@@ -7,31 +7,31 @@
     <style>
         /* Design Tokens - Enhanced Color Palette */
         :root {
-            /* Colors */
-            --text-primary: #1f2937;
-            --text-secondary: #6b7280;
-            --text-tertiary: #9ca3af;
+            /* Colors - 蓝白配色 */
+            --text-primary: #1e3a8a;
+            --text-secondary: #475569;
+            --text-tertiary: #94a3b8;
 
             --bg-primary: #ffffff;
-            --bg-secondary: #f9fafb;
-            --bg-tertiary: #f3f4f6;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #e2e8f0;
             --bg-elevated: #ffffff;
 
-            --accent: #6366f1;
-            --accent-hover: #4f46e5;
-            --accent-light: #e0e7ff;
-            --accent-subtle: #c7d2fe;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --accent-light: #dbeafe;
+            --accent-subtle: #bfdbfe;
 
-            --success: #10b981;
+            --success: #059669;
             --success-light: #d1fae5;
-            --error: #ef4444;
+            --error: #dc2626;
             --error-light: #fee2e2;
-            --warning: #f59e0b;
+            --warning: #d97706;
             --warning-light: #fef3c7;
 
-            /* Gradients */
-            --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            --gradient-success: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            /* Gradients - 蓝色渐变 */
+            --gradient-primary: linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #0ea5e9 100%);
+            --gradient-success: linear-gradient(135deg, #059669 0%, #10b981 100%);
 
             /* Spacing */
             --space-1: 4px;
@@ -75,9 +75,9 @@
 
             /* Shadows */
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 6px -1px rgba(37, 99, 235, 0.15), 0 2px 4px -1px rgba(37, 99, 235, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(37, 99, 235, 0.2), 0 4px 6px -2px rgba(37, 99, 235, 0.15);
+            --shadow-xl: 0 20px 25px -5px rgba(37, 99, 235, 0.25), 0 10px 10px -5px rgba(37, 99, 235, 0.15);
 
             /* Transitions */
             --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -163,8 +163,22 @@
             border-radius: var(--radius-xl);
             padding: var(--space-6);
             max-height: calc(100vh - 120px);
-            overflow-y: auto;
             box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .left-panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: var(--space-1);
+        }
+
+        .left-panel-footer {
+            padding-top: var(--space-5);
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+            margin-top: var(--space-4);
+            padding-bottom: var(--space-2);
         }
 
         /* 右侧面板 */
@@ -283,10 +297,10 @@
         /* File Info */
         #fileInfo {
             background: var(--bg-secondary);
-            border: 1px solid var(--bg-tertiary);
-            border-radius: var(--radius-md);
-            padding: var(--space-4);
-            margin-bottom: var(--space-4);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: var(--radius-lg);
+            padding: var(--space-5);
+            margin-bottom: var(--space-5);
             display: none;
         }
 
@@ -297,21 +311,22 @@
         .file-info-row {
             display: flex;
             justify-content: space-between;
-            font-size: var(--font-size-sm);
+            font-size: var(--font-size-md);
             color: var(--text-secondary);
-            padding: var(--space-1) 0;
+            padding: var(--space-2) 0;
         }
 
         .file-info-row strong {
             color: var(--text-primary);
+            font-weight: var(--font-weight-semibold);
         }
 
         /* Options Panel */
         #levelSelector, #excelInfo {
-            border: 1px solid var(--bg-tertiary);
-            border-radius: var(--radius-md);
-            padding: var(--space-4);
-            margin-bottom: var(--space-4);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: var(--radius-lg);
+            padding: var(--space-5);
+            margin-bottom: var(--space-5);
             display: none;
         }
 
@@ -320,10 +335,10 @@
         }
 
         .panel-label {
-            font-size: var(--font-size-sm);
-            font-weight: var(--font-weight-medium);
+            font-size: var(--font-size-md);
+            font-weight: var(--font-weight-semibold);
             color: var(--text-secondary);
-            margin-bottom: var(--space-3);
+            margin-bottom: var(--space-4);
         }
 
         .level-options {
@@ -344,51 +359,53 @@
             display: inline-block;
             padding: var(--space-2) var(--space-4);
             background: var(--bg-primary);
-            border: 1px solid var(--bg-tertiary);
+            border: 1px solid rgba(0, 0, 0, 0.1);
             border-radius: var(--radius-md);
             color: var(--text-secondary);
-            font-size: var(--font-size-sm);
-            font-weight: var(--font-weight-normal);
-            transition: all 0.15s ease;
+            font-size: var(--font-size-md);
+            font-weight: var(--font-weight-medium);
+            transition: all var(--transition-fast);
         }
 
         .level-option input[type="radio"]:checked + span {
             background: var(--accent);
             border-color: var(--accent);
             color: var(--bg-primary);
+            box-shadow: var(--shadow-md);
         }
 
         .level-option:hover span {
-            border-color: var(--text-tertiary);
+            border-color: var(--accent);
         }
 
         /* Buttons */
         .btn {
-            background: var(--accent);
+            background: var(--gradient-primary);
             color: var(--bg-primary);
             border: none;
-            padding: var(--space-4) var(--space-8);
-            border-radius: var(--radius-md);
-            font-size: var(--font-size-md);
-            font-weight: var(--font-weight-semibold);
+            padding: var(--space-5) var(--space-10);
+            border-radius: var(--radius-lg);
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-bold);
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: var(--space-2);
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 6px rgba(0, 122, 255, 0.3);
+            transition: all var(--transition-base);
+            box-shadow: var(--shadow-lg);
+            letter-spacing: 0.01em;
+            width: 100%;
         }
 
         .btn:hover:not(:disabled) {
-            background: var(--accent-hover);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
         }
 
         .btn:active:not(:disabled) {
             transform: translateY(0);
-            box-shadow: 0 2px 6px rgba(0, 122, 255, 0.3);
+            box-shadow: var(--shadow-md);
         }
 
         .btn:disabled {
@@ -400,13 +417,19 @@
         }
 
         .btn-secondary {
-            background: var(--bg-secondary);
+            background: var(--bg-primary);
             color: var(--text-primary);
-            border: 1px solid var(--bg-tertiary);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            padding: var(--space-3) var(--space-6);
+            font-size: var(--font-size-md);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            width: auto;
         }
 
         .btn-secondary:hover {
             background: var(--bg-tertiary);
+            border-color: rgba(0, 0, 0, 0.15);
         }
 
         .btn-icon {
@@ -418,8 +441,7 @@
 
         .btn-group {
             display: flex;
-            gap: var(--space-2);
-            margin-top: var(--space-4);
+            gap: var(--space-3);
         }
 
         /* Progress */
@@ -439,21 +461,30 @@
             padding: var(--space-4);
         }
 
+        #progress {
+            margin-top: var(--space-4);
+            display: none;
+        }
+
+        #progress.show {
+            display: block;
+        }
+
         .progress-bar {
-            background: #e0e0e0;
-            border-radius: 10px;
-            height: 8px;
+            background: rgba(37, 99, 235, 0.1);
+            border-radius: var(--radius-full);
+            height: 10px;
             overflow: hidden;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .progress-fill {
-            background: linear-gradient(90deg, var(--accent) 0%, #4dabf7 100%);
+            background: var(--gradient-primary);
             height: 100%;
             width: 0%;
-            transition: width 0.3s ease;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 122, 255, 0.4);
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: var(--radius-full);
+            box-shadow: 0 0 20px rgba(37, 99, 235, 0.4);
         }
 
         .progress-text {
@@ -461,15 +492,7 @@
             color: var(--text-secondary);
             margin-top: var(--space-3);
             text-align: center;
-            font-weight: var(--font-weight-medium);
-        }
-
-        .progress-container {
-            background: #fafafa;
-            border: 1px solid #e0e0e0;
-            border-radius: var(--radius-md);
-            padding: var(--space-4);
-            margin-top: var(--space-4);
+            font-weight: var(--font-weight-semibold);
         }
 
         /* Result & Preview */
@@ -483,104 +506,133 @@
         }
 
         .preview-section {
-            border: 2px solid #e0e0e0;
-            border-radius: var(--radius-md);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: var(--radius-lg);
             overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            box-shadow: var(--shadow-lg);
             display: flex;
             flex-direction: column;
             flex: 1;
         }
 
         .preview-header {
-            background: #f5f5f5;
-            padding: var(--space-3) var(--space-4);
-            border-bottom: 2px solid #e0e0e0;
+            background: var(--bg-secondary);
+            padding: var(--space-4) var(--space-5);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
         .preview-title {
-            font-size: var(--font-size-md);
-            font-weight: var(--font-weight-medium);
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-semibold);
             color: var(--text-primary);
         }
 
         .preview-actions {
             display: flex;
-            gap: var(--space-2);
+            gap: var(--space-3);
         }
 
         .preview-text {
             background: var(--bg-primary);
-            padding: var(--space-4);
+            padding: var(--space-6);
             flex: 1;
             overflow-y: auto;
             white-space: pre-wrap;
-            font-family: ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', monospace;
-            font-size: var(--font-size-sm);
-            line-height: 1.6;
+            font-family: var(--font-mono);
+            font-size: var(--font-size-md);
+            line-height: var(--line-height-relaxed);
             color: var(--text-secondary);
         }
 
         .preview-text::-webkit-scrollbar {
-            width: 8px;
+            width: 10px;
         }
 
         .preview-text::-webkit-scrollbar-track {
             background: var(--bg-secondary);
+            border-radius: var(--radius-full);
         }
 
         .preview-text::-webkit-scrollbar-thumb {
-            background: var(--bg-tertiary);
-            border-radius: var(--radius-sm);
+            background: rgba(37, 99, 235, 0.2);
+            border-radius: var(--radius-full);
+        }
+
+        .preview-text::-webkit-scrollbar-thumb:hover {
+            background: rgba(37, 99, 235, 0.35);
+        }
+
+        .left-panel-content::-webkit-scrollbar,
+        .section-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .left-panel-content::-webkit-scrollbar-track,
+        .section-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .left-panel-content::-webkit-scrollbar-thumb,
+        .section-list::-webkit-scrollbar-thumb {
+            background: rgba(37, 99, 235, 0.15);
+            border-radius: var(--radius-full);
+        }
+
+        .left-panel-content::-webkit-scrollbar-thumb:hover,
+        .section-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(37, 99, 235, 0.25);
         }
 
         /* Messages */
         .message {
-            padding: var(--space-3) var(--space-4);
-            border-radius: var(--radius-md);
-            font-size: var(--font-size-sm);
-            margin-top: var(--space-4);
+            padding: var(--space-4) var(--space-5);
+            border-radius: var(--radius-lg);
+            font-size: var(--font-size-md);
+            font-weight: var(--font-weight-medium);
+            margin-top: var(--space-5);
             display: none;
+            box-shadow: var(--shadow-sm);
         }
 
         .message.success {
-            background: rgba(34, 197, 94, 0.1);
-            color: var(--success);
-            border: 1px solid rgba(34, 197, 94, 0.2);
+            background: var(--success-light);
+            color: #065f46;
+            border: 1px solid rgba(16, 185, 129, 0.2);
         }
 
         .message.error {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--error);
+            background: var(--error-light);
+            color: #991b1b;
             border: 1px solid rgba(239, 68, 68, 0.2);
         }
 
         /* Footer */
         .footer {
-            padding: var(--space-4);
+            padding: var(--space-5);
             text-align: center;
             color: var(--text-tertiary);
-            font-size: var(--font-size-xs);
+            font-size: var(--font-size-sm);
         }
 
         /* Utility */
         .divider {
-            border-top: 1px solid var(--bg-tertiary);
-            margin: var(--space-4) 0;
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+            margin: var(--space-5) 0;
         }
 
         .file-badge {
             display: inline-flex;
             align-items: center;
             gap: var(--space-1);
-            padding: var(--space-1) var(--space-2);
-            background: var(--bg-secondary);
+            padding: var(--space-1) var(--space-3);
+            background: var(--accent-light);
             border-radius: var(--radius-sm);
             font-size: var(--font-size-xs);
-            color: var(--text-tertiary);
+            font-weight: var(--font-weight-semibold);
+            color: var(--accent);
         }
 
         .success-icon {
@@ -601,68 +653,70 @@
     <main class="main">
         <!-- 左侧面板 -->
         <div class="left-panel">
-            <h1 class="title">AlltoMarkdown</h1>
+            <div class="left-panel-content">
+                <h1 class="title">AlltoMarkdown</h1>
 
-            <div class="upload-area" id="uploadArea">
-                <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="17 8 12 3 7 8"/>
-                    <line x1="12" y1="3" x2="12" y2="15"/>
-                </svg>
-                <div class="upload-text">点击或拖拽上传文件</div>
-                <div class="upload-hint">支持 .docx, .xlsx, .xls, .pdf, .png, .jpg, .jpeg 格式</div>
-            </div>
-
-            <input type="file" id="fileInput" accept=".docx,.xlsx,.xls,.pdf,.png,.jpg,.jpeg">
-
-            <div id="fileInfo"></div>
-
-            <div id="levelSelector">
-                <div class="panel-label">切分层级（仅 Word 文档）</div>
-                <div class="level-options">
-                    <label class="level-option">
-                        <input type="radio" name="sliceLevel" value="0">
-                        <span>零级</span>
-                    </label>
-                    <label class="level-option">
-                        <input type="radio" name="sliceLevel" value="1">
-                        <span>一级</span>
-                    </label>
-                    <label class="level-option">
-                        <input type="radio" name="sliceLevel" value="2" checked>
-                        <span>二级</span>
-                    </label>
-                    <label class="level-option">
-                        <input type="radio" name="sliceLevel" value="3">
-                        <span>三级</span>
-                    </label>
-                    <label class="level-option">
-                        <input type="radio" name="sliceLevel" value="all">
-                        <span>全部</span>
-                    </label>
+                <div class="upload-area" id="uploadArea">
+                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    <div class="upload-text">点击或拖拽上传文件</div>
+                    <div class="upload-hint">支持 .docx, .xlsx, .xls, .pdf, .png, .jpg, .jpeg 格式</div>
                 </div>
+
+                <input type="file" id="fileInput" accept=".docx,.xlsx,.xls,.pdf,.png,.jpg,.jpeg">
+
+                <div id="fileInfo"></div>
+
+                <div id="levelSelector">
+                    <div class="panel-label">切分层级（仅 Word 文档）</div>
+                    <div class="level-options">
+                        <label class="level-option">
+                            <input type="radio" name="sliceLevel" value="0">
+                            <span>零级</span>
+                        </label>
+                        <label class="level-option">
+                            <input type="radio" name="sliceLevel" value="1">
+                            <span>一级</span>
+                        </label>
+                        <label class="level-option">
+                            <input type="radio" name="sliceLevel" value="2" checked>
+                            <span>二级</span>
+                        </label>
+                        <label class="level-option">
+                            <input type="radio" name="sliceLevel" value="3">
+                            <span>三级</span>
+                        </label>
+                        <label class="level-option">
+                            <input type="radio" name="sliceLevel" value="all">
+                            <span>全部</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="excelInfo" style="display: none;"></div>
+                <div id="pdfInfo" style="display: none;"></div>
+                <div id="imageInfo" style="display: none;"></div>
             </div>
 
-            <div id="excelInfo" style="display: none;"></div>
-            <div id="pdfInfo" style="display: none;"></div>
-            <div id="imageInfo" style="display: none;"></div>
+            <div class="left-panel-footer">
+                <button class="btn" id="convertBtn" disabled>
+                    开始转换
+                </button>
 
-            <button class="btn" id="convertBtn" disabled>
-                开始转换
-            </button>
-
-            <div id="progress">
-                <div class="progress-container">
+                <div id="progress">
                     <div class="progress-bar">
                         <div class="progress-fill" id="progressFill"></div>
                     </div>
                     <div class="progress-text" id="progressText">准备中...</div>
                 </div>
+
+                <div id="result"></div>
+
+                <div class="message" id="message"></div>
             </div>
-
-            <div id="result"></div>
-
-            <div class="message" id="message"></div>
         </div>
 
         <!-- 右侧面板 -->

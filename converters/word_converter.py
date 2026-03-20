@@ -2,9 +2,12 @@
 Word转换器
 将Word文档转换为Markdown，支持切片和图片识别
 """
+import logging
 import re
 from pathlib import Path
 from typing import Dict, List, Optional
+
+logger = logging.getLogger(__name__)
 from docx import Document
 from docx.document import Document as DocxDocument
 from docx.oxml.table import CT_Tbl
@@ -118,10 +121,11 @@ class WordConverter(BaseConverter):
                                 images.append({
                                     'id': embed[0],
                                     'data': image_data,
-                                    'format': image_format
+                                    'format': image_format,
+                                    'placeholder': None  # 占位符由调用者根据行号生成
                                 })
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.warning(f"Error extracting paragraph image: {e}")
         return images
 
     def _get_image_data(self, embed: str) -> Optional[bytes]:
@@ -146,6 +150,125 @@ class WordConverter(BaseConverter):
         except Exception:
             pass
         return 'png'
+
+    def table_to_markdown_with_images(self, table: Table, start_no: int = 1, processed_images: Dict = None) -> tuple[Optional[str], int]:
+        """
+        将表格转换为Markdown格式，支持图片合并
+
+        Args:
+            table: 表格对象
+            start_no: 起始行号
+            processed_images: 已处理的图片字典
+
+        Returns:
+            (Markdown内容, 下一行号）
+        """
+        if processed_images is None:
+            processed_images = {}
+
+        if not table.rows:
+            return None, start_no
+
+        lines = []
+        no = start_no
+
+        # 处理表头
+        header_cells = [cell.text.strip().replace('\n', ' ') for cell in table.rows[0].cells]
+        lines.append(f"<!-- {no} --> | " + " | ".join(header_cells) + " |")
+        lines.append("<!-- " + str(no + 1) + " --> |" + "|".join(["---"] * len(header_cells)) + "|")
+        no += 2
+
+        # 处理数据行
+        for row in table.rows[1:]:
+            # 收集当前行的所有图片
+            row_images = []
+            for cell in row.cells:
+                for paragraph in cell.paragraphs:
+                    row_images.extend(self.extract_paragraph_images(paragraph))
+
+            # 如果该行有图片，合并输出
+            if row_images:
+                descriptions = []
+                for img in row_images:
+                    desc = processed_images.get(img['id'])
+                    if desc:
+                        descriptions.append(f"[图片: {desc}]")
+                    else:
+                        descriptions.append("[图片: 未识别图片]")
+
+                # 合并图片作为新的一行，使用表格格式
+                lines.append(f"<!-- {no} --> | " + " | ".join(descriptions) + " |")
+                no += 1
+
+            # 添加表格行内容
+            cells = [cell.text.strip().replace('\n', ' ') for cell in row.cells]
+            if not all(cell in ("", " ") for cell in cells):
+                lines.append(f"<!-- {no} --> | " + " | ".join(cells) + " |")
+                no += 1
+
+        return '\n'.join(lines) + '\n\n', no
+
+    def process_images_batch(self, image_objects: List[Dict]) -> Dict:
+        """
+        批量处理图片，使用 LLM 识别
+
+        Args:
+            image_objects: 图片对象列表
+
+        Returns:
+            图片ID到描述的映射字典
+        """
+        if not config.LLM_AVAILABLE or not self.llm_service:
+            logger.warning("LLM service not available, returning None for all images")
+            return {img['id']: None for img in image_objects}
+
+        logger.info(f"开始批量处理 {len(image_objects)} 张图片")
+
+        # 过滤需要处理的图片
+        images_to_process = []
+        for img in image_objects:
+            if img['data']:  # 只有有实际数据的图片才处理
+                images_to_process.append(img)
+            else:
+                logger.warning(f"图片 {img['id']} 没有数据，跳过处理")
+
+        if not images_to_process:
+            logger.info("No images to process")
+            return {img['id']: None for img in image_objects}
+
+        # 限制图片大小（例如 10MB）
+        processed_results = {}
+        for i, img in enumerate(images_to_process, 1):
+            try:
+                logger.info(f"正在处理第 {i}/{len(images_to_process)} 张图片: {img['id']}")
+                image_size = len(img['data'])
+                logger.info(f"图片大小: {image_size / 1024:.2f} KB, 格式: {img['format']}")
+
+                if image_size > 10 * 1024 * 1024:  # 10MB
+                    processed_results[img['id']] = None
+                    logger.warning(f"Image {img['id']} too large, skipping")
+                    continue
+
+                logger.info(f"开始调用 LLM API 识别图片 {img['id']}")
+                description = self.llm_service.describe_image(img['data'], img['format'])
+                logger.info(f"LLM API 调用完成，结果长度: {len(description) if description else 0}")
+
+                if description:
+                    processed_results[img['id']] = description
+                    logger.info(f"图片 {img['id']} 处理成功")
+                else:
+                    processed_results[img['id']] = None
+                    logger.warning(f"图片 {img['id']} 识别失败")
+            except Exception as e:
+                logger.error(f"Error processing image {img['id']}: {e}")
+                processed_results[img['id']] = None
+
+        # 为未处理的图片添加 None
+        for img in image_objects:
+            if img['id'] not in processed_results:
+                processed_results[img['id']] = None
+
+        return processed_results
 
     def table_to_markdown(self, table: Table, start_no: int = 1) -> tuple[Optional[str], int]:
         """
@@ -298,15 +421,49 @@ class WordConverter(BaseConverter):
         if not self.doc:
             self.load_document()
 
+        # 收集所有图片
+        all_images = []
+
+        # 遍历文档收集图片
+        logger.info(f"开始提取图片，文档包含 {len(self.doc.paragraphs)} 个段落和 {len(self.doc.tables)} 个表格")
+        for paragraph in self.doc.paragraphs:
+            images = self.extract_paragraph_images(paragraph)
+            all_images.extend(images)
+
+        for table in self.doc.tables:
+            # 收集表格中的图片
+            for row in table.rows:
+                for cell in row.cells:
+                    for paragraph in cell.paragraphs:
+                        images = self.extract_paragraph_images(paragraph)
+                        all_images.extend(images)
+
+        logger.info(f"共提取到 {len(all_images)} 张图片")
+
+        # 使用 LLM 处理图片
+        processed_images = {}
+        if config.LLM_AVAILABLE and self.llm_service and all_images:
+            logger.info(f"开始使用 LLM 处理 {len(all_images)} 张图片")
+            processed_images = self.process_images_batch(all_images)
+            logger.info(f"LLM 图片处理完成，成功处理 {len([k for k, v in processed_images.items() if v])} 张图片")
+        else:
+            # LLM 不可用时设置为 None，由调用者生成占位符
+            logger.warning(f"LLM 不可用或没有图片")
+            for img in all_images:
+                processed_images[img['id']] = None
+
         # 零级模式：整个文档为一个文件
         if max_level == 0:
-            return [self._create_full_document()]
+            return [self._create_full_document(processed_images)]
 
         # 按章节切片
-        return self._slice_by_heading(max_level)
+        return self._slice_by_heading(max_level, processed_images)
 
-    def _create_full_document(self) -> Dict:
+    def _create_full_document(self, processed_images: Dict = None) -> Dict:
         """创建完整的单一文档"""
+        if processed_images is None:
+            processed_images = {}
+
         section = {
             'level': 0,
             'title': self.file_path.stem,
@@ -319,8 +476,9 @@ class WordConverter(BaseConverter):
             if isinstance(block, Paragraph):
                 level = self.get_heading_level(block)
                 text = block.text.strip()
+                images = self.extract_paragraph_images(block)
 
-                if not text:
+                if not text and not images:
                     continue
 
                 # 跳过目录
@@ -329,19 +487,34 @@ class WordConverter(BaseConverter):
 
                 if level > 0:
                     section['content'].append(f"<!-- {line_no} --> {'#' * level} {text}\n")
-                else:
+                    line_no += 1
+                elif text:
                     section['content'].append(f"<!-- {line_no} --> {text}\n")
-                line_no += 1
+                    line_no += 1
+
+                # 处理图片
+                for img in images:
+                    description = processed_images.get(img['id'])
+                    if description:
+                        # LLM 识别结果
+                        section['content'].append(f"<!-- {line_no} -->[图片: {description}]\n")
+                    else:
+                        # 使用占位符
+                        section['content'].append(f"<!-- {line_no} -->[图片: 未识别图片]\n")
+                    line_no += 1
 
             elif isinstance(block, Table):
-                table_md, line_no = self.table_to_markdown(block, line_no)
+                table_md, line_no = self.table_to_markdown_with_images(block, line_no, processed_images)
                 if table_md:
                     section['content'].append(table_md)
 
         return section
 
-    def _slice_by_heading(self, max_level):
+    def _slice_by_heading(self, max_level, processed_images: Dict = None):
         """按标题切片"""
+        if processed_images is None:
+            processed_images = {}
+
         if max_level is None or max_level == 'all':
             max_level = float('inf')
 
@@ -362,8 +535,9 @@ class WordConverter(BaseConverter):
             if isinstance(block, Paragraph):
                 level = self.get_heading_level(block)
                 text = block.text.strip()
+                images = self.extract_paragraph_images(block)
 
-                if not text:
+                if not text and not images:
                     continue
 
                 if any(kw in text for kw in ['目录', '目  录', 'CONTENTS']):
@@ -388,11 +562,25 @@ class WordConverter(BaseConverter):
                     section_stack[-1]['content'].append(f"<!-- {line_no} --> {'#' * level} {text}\n")
                     line_no += 1
                 else:
-                    section_stack[-1]['content'].append(f"<!-- {line_no} --> {text}\n")
+                    if level > 0:
+                        section_stack[-1]['content'].append(f"<!-- {line_no} --> {'#' * level} {text}\n")
+                    elif text:
+                        section_stack[-1]['content'].append(f"<!-- {line_no} --> {text}\n")
+                    line_no += 1
+
+                # 处理图片
+                for img in images:
+                    description = processed_images.get(img['id'])
+                    if description:
+                        # LLM 识别结果
+                        section_stack[-1]['content'].append(f"<!-- {line_no} -->[图片: {description}]\n")
+                    else:
+                        # 使用占位符
+                        section_stack[-1]['content'].append(f"<!-- {line_no} -->[图片: 未识别图片]\n")
                     line_no += 1
 
             elif isinstance(block, Table):
-                table_md, line_no = self.table_to_markdown(block, line_no)
+                table_md, line_no = self.table_to_markdown_with_images(block, line_no, processed_images)
                 if table_md:
                     section_stack[-1]['content'].append(table_md)
 
