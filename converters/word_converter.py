@@ -233,15 +233,15 @@ class WordConverter(BaseConverter):
 
         return str(zip_path)
 
-    def get_preview_text(self, options: Dict) -> str:
+    def get_preview_text(self, options: Dict) -> tuple[str, List[Dict]]:
         """
-        获取预览文本（第一个章节的内容）
+        获取预览文本和所有切片信息
 
         Args:
             options: 转换选项
 
         Returns:
-            Markdown预览文本
+            (预览文本, 切片列表)
         """
         self.load_document()
 
@@ -253,13 +253,45 @@ class WordConverter(BaseConverter):
             max_level = int(max_level)
 
         sections = self._slice_document(max_level)
+        self.sections = sections  # 缓存切片信息
 
         if not sections:
-            return "# 空文档"
+            return "# 空文档", []
 
-        # 返回第一个章节的内容
-        first_section = sections[0]
-        return ''.join(first_section['content'])
+        # 返回第一个切片的内容和所有切片信息
+        first_section_content = ''.join(sections[0]['content'])
+
+        # 构建切片信息列表（包含完整内容用于缓存）
+        sections_info = []
+        for section in sections:
+            sections_info.append({
+                'index': section['index'],
+                'title': section['title'],
+                'filename': f"{section['index']:03d}_{self.zip_helper.sanitize_filename(section['title'])}.md",
+                'content': ''.join(section['content'])
+            })
+
+        return first_section_content, sections_info
+
+    def get_sections(self) -> List[Dict]:
+        """
+        获取所有切片信息（不包含完整内容）
+
+        Returns:
+            切片列表，每个切片包含：index, title, filename
+        """
+        if not hasattr(self, 'sections') or not self.sections:
+            # 需要先执行转换
+            self.load_document()
+            max_level = 0  # 默认值，或根据实际需求调整
+            self.sections = self._slice_document(max_level)
+
+        # 返回不含完整内容的切片信息
+        return [{
+            'index': s['index'],
+            'title': s['title'],
+            'filename': s.get('filename', f"{s['index']:03d}.md")
+        } for s in self.sections]
 
     def _slice_document(self, max_level):
         """切片文档"""

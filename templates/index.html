@@ -93,29 +93,75 @@
             border-radius: var(--radius-sm);
         }
 
-        /* Main Content */
+        /* Main Content - 左右分栏 */
         .main {
             flex: 1;
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
-            padding: var(--space-8) var(--space-4);
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: var(--space-6);
+            padding: var(--space-6);
+            align-items: start;
         }
 
-        .container {
+        /* 左侧面板 */
+        .left-panel {
             background: var(--bg-primary);
             border: 1px solid var(--bg-tertiary);
             border-radius: var(--radius-lg);
-            padding: var(--space-10);
-            max-width: 720px;
-            width: 100%;
+            padding: var(--space-6);
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+
+        /* 右侧面板 */
+        .right-panel {
+            background: var(--bg-primary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: var(--radius-lg);
+            min-height: calc(100vh - 120px);
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            overflow: hidden;
+        }
+
+        /* 右侧-切片列表 */
+        .section-list {
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--bg-tertiary);
+            overflow-y: auto;
+            max-height: calc(100vh - 120px);
+        }
+
+        .section-item {
+            padding: var(--space-3) var(--space-4);
+            cursor: pointer;
+            border-bottom: 1px solid var(--bg-tertiary);
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+            transition: all 0.15s ease;
+        }
+
+        .section-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .section-item.active {
+            background: rgba(0, 122, 255, 0.08);
+            color: var(--accent);
+            border-left: 3px solid var(--accent);
+        }
+
+        /* 右侧-预览内容 */
+        .preview-panel {
+            overflow-y: auto;
+            max-height: calc(100vh - 120px);
         }
 
         .title {
-            font-size: var(--font-size-xl);
+            font-size: var(--font-size-lg);
             font-weight: var(--font-weight-semibold);
             color: var(--text-primary);
-            margin-bottom: var(--space-6);
+            margin-bottom: var(--space-5);
         }
 
         /* Upload Area */
@@ -448,7 +494,8 @@
     </header>
 
     <main class="main">
-        <div class="container">
+        <!-- 左侧面板 -->
+        <div class="left-panel">
             <h1 class="title">文档转 Markdown</h1>
 
             <div class="upload-area" id="uploadArea">
@@ -513,6 +560,26 @@
 
             <div class="message" id="message"></div>
         </div>
+
+        <!-- 右侧面板 -->
+        <div class="right-panel" id="rightPanel" style="display: none;">
+            <!-- 切片/Sheet 列表 -->
+            <div class="section-list" id="sectionList"></div>
+
+            <!-- 预览内容 -->
+            <div class="preview-panel">
+                <div class="preview-section">
+                    <div class="preview-header">
+                        <span class="preview-title" id="previewTitle">预览</span>
+                        <div class="preview-actions">
+                            <button class="btn btn-secondary" onclick="copyContent()">复制</button>
+                            <button class="btn" onclick="downloadZip()">下载 ZIP</button>
+                        </div>
+                    </div>
+                    <div class="preview-text" id="previewText"></div>
+                </div>
+            </div>
+        </div>
     </main>
 
     <footer class="footer">
@@ -534,6 +601,9 @@
 
         let selectedFile = null;
         let fileType = null;
+        let sessionId = null;          // 会话ID，用于缓存
+        let cachedSections = [];        // 缓存的切片列表
+        let currentSectionIndex = 0;   // 当前选中的切片索引
 
         uploadArea.addEventListener('click', () => fileInput.click());
 
@@ -612,6 +682,7 @@
                     convertBtn.disabled = false;
                     result.innerHTML = '';
                     result.classList.remove('show');
+                    rightPanel.style.display = 'none';  // 隐藏右侧面板
                     message.style.display = 'none';
                 } else {
                     showError(data.error);
@@ -627,6 +698,7 @@
             progress.classList.add('show');
             result.innerHTML = '';
             result.classList.remove('show');
+            rightPanel.style.display = 'none';  // 隐藏右侧面板
             convertBtn.disabled = true;
             message.style.display = 'none';
 
@@ -640,8 +712,8 @@
             formData.append('file', selectedFile);
             formData.append('options', JSON.stringify(options));
 
-            const mode = (fileType === 'word') ? 'download' : 'preview';
-            formData.append('mode', mode);
+            // 统一使用预览模式
+            formData.append('mode', 'preview');
 
             try {
                 updateProgress(50, '转换中...');
@@ -651,33 +723,13 @@
                     body: formData
                 });
 
-                if (fileType === 'word') {
-                    if (response.ok) {
-                        const blob = await response.blob();
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `converted_${selectedFile.name}.zip`;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        URL.revokeObjectURL(url);
+                const data = await response.json();
 
-                        updateProgress(100, '转换完成');
-                        showSuccess('Word 文档转换成功，ZIP 已下载');
-                    } else {
-                        const data = await response.json();
-                        showError(data.error || '下载失败');
-                    }
+                if (data.success) {
+                    updateProgress(100, '转换完成');
+                    handleConvertResponse(data);
                 } else {
-                    const data = await response.json();
-
-                    if (data.success) {
-                        updateProgress(100, '转换完成');
-                        showPreview(data);
-                    } else {
-                        showError(data.error);
-                    }
+                    showError(data.error);
                 }
             } catch (error) {
                 showError('转换失败: ' + error.message);
@@ -687,28 +739,83 @@
             }
         });
 
-        function showPreview(data) {
-            result.innerHTML = `
-                <div class="preview-section">
-                    <div class="preview-header">
-                        <span class="preview-title">转换结果</span>
-                        <div class="preview-actions">
-                            <button class="btn btn-secondary" onclick="copyContent()">
-                                复制
-                            </button>
-                            <button class="btn" onclick="downloadZip()">
-                                下载 ZIP
-                            </button>
-                        </div>
-                    </div>
-                    <div class="preview-text" id="previewText">${escapeHtml(data.preview_text)}</div>
+        async function handleConvertResponse(data) {
+            sessionId = data.session_id;
+            cachedSections = data.sections;
+            currentSectionIndex = 0;
+
+            // 显示右侧面板
+            rightPanel.style.display = 'grid';
+
+            // 渲染切片列表
+            renderSectionList(cachedSections);
+
+            // 显示第一个切片的预览
+            if (cachedSections[0]) {
+                showSectionPreview(0);
+            }
+        }
+
+        function renderSectionList(sections) {
+            sectionList.innerHTML = sections.map((section, index) => `
+                <div class="section-item ${index === currentSectionIndex ? 'active' : ''}"
+                     onclick="switchSection(${index})">
+                    ${section.title || '无标题'}
                 </div>
-            `;
-            result.classList.add('show');
+            `).join('');
+        }
+
+        async function switchSection(index) {
+            if (index === currentSectionIndex) return;
+            currentSectionIndex = index;
+
+            // 更新列表选中状态
+            renderSectionList(cachedSections);
+
+            // 从缓存或服务器获取内容
+            if (cachedSections[index].content) {
+                // 已有缓存
+                showPreviewContent(cachedSections[index].content);
+            } else {
+                // 从服务器获取
+                await fetchSectionContent(sessionId, index);
+            }
+        }
+
+        async function fetchSectionContent(sessionId, index) {
+            try {
+                const response = await fetch(`/api/section/${sessionId}/${index}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    // 缓存内容
+                    cachedSections[index].content = data.content;
+                    showPreviewContent(data.content);
+                } else {
+                    showError(data.error || '获取内容失败');
+                }
+            } catch (error) {
+                showError('获取内容失败: ' + error.message);
+            }
+        }
+
+        function showSectionPreview(index) {
+            if (cachedSections[index]) {
+                previewTitle.textContent = cachedSections[index].title || '预览';
+                showPreviewContent(cachedSections[index].content || '');
+            }
+        }
+
+        function showPreviewContent(content) {
+            previewText.textContent = content;
+        }
+
+        // showPreview 函数已不再使用，被 handleConvertResponse 替代
+        function showPreview(data) {
+            // 保留空函数以兼容旧的调用方式
         }
 
         function copyContent() {
-            const previewText = document.getElementById('previewText');
             const text = previewText.textContent;
 
             if (navigator.clipboard && navigator.clipboard.writeText) {

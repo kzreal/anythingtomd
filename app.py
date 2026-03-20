@@ -8,6 +8,7 @@ import sys
 import time
 from datetime import datetime
 from pathlib import Path
+from typing import Dict, List, Optional
 from urllib.parse import quote
 
 from flask import Flask, jsonify, render_template, request, send_file
@@ -41,6 +42,40 @@ logger.info(f"LLM服务可用: {config.LLM_AVAILABLE}")
 if config.LLM_AVAILABLE:
     logger.info(f"LLM端点: {config.LLM_API_ENDPOINT[:50]}...")
 logger.info(f"下载路径: {config.DOWNLOAD_FOLDER}")
+
+# 全局缓存字典
+conversion_cache = {}
+
+
+def get_session_id():
+    """生成唯一的会话ID"""
+    import uuid
+    return str(uuid.uuid4())
+
+
+def cache_conversion(session_id: str, sections: List, options: Dict, file_type: str):
+    """缓存转换结果"""
+    conversion_cache[session_id] = {
+        'sections': sections,
+        'options': options,
+        'file_type': file_type,
+        'timestamp': time.time()
+    }
+
+
+def get_cached_sections(session_id: str, index: int = None) -> Optional[Dict]:
+    """获取缓存的切片内容"""
+    if session_id not in conversion_cache:
+        return None
+
+    cached = conversion_cache[session_id]
+    if index is not None:
+        # 返回指定切片
+        if 0 <= index < len(cached['sections']):
+            return cached['sections'][index]
+        return None
+
+    return cached
 
 
 # 错误处理
@@ -151,33 +186,53 @@ def convert_file():
 
         # 根据文件类型决定处理方式
         if file_type == 'word':
-            # Word：直接下载，不做预览
-            zip_path = converter.convert(options)
-            converter.cleanup()
-
-            safe_filename = quote(f"converted_{filename}.zip", safe='')
-
-            return send_file(
-                zip_path,
-                mimetype='application/zip',
-                as_attachment=True,
-                download_name=f"converted_{filename}.zip"
-            )
-        else:
-            # Excel：预览模式或下载模式
+            # Word：支持预览模式和下载模式
             if mode == 'preview':
-                # 预览模式：返回文本
-                preview_text = converter.get_preview_text(options)
-                sections = converter.get_sections()
+                # 预览模式：返回 JSON
+                preview_text, sections_info = converter.get_preview_text(options)
+
+                # 生成会话ID并缓存
+                session_id = get_session_id()
+                cache_conversion(session_id, sections_info, options, file_type)
 
                 return jsonify({
                     'success': True,
+                    'session_id': session_id,
+                    'sections': sections_info,
+                    'preview_text': preview_text,
+                    'file_count': len(sections_info),
+                    'zip_ready': True
+                })
+            else:
+                # 下载模式：返回 ZIP
+                zip_path = converter.convert(options)
+                converter.cleanup()
+
+                safe_filename = quote(f"converted_{filename}.zip", safe='')
+
+                return send_file(
+                    zip_path,
+                    mimetype='application/zip',
+                    as_attachment=True,
+                    download_name=f"converted_{filename}.zip"
+                )
+        else:
+            # Excel：预览模式或下载模式
+            if mode == 'preview':
+                # 预览模式：返回 JSON
+                preview_text = converter.get_preview_text(options)
+                sections = converter.get_sections()
+
+                # 生成会话ID并缓存
+                session_id = get_session_id()
+                cache_conversion(session_id, sections, options, file_type)
+
+                return jsonify({
+                    'success': True,
+                    'session_id': session_id,
+                    'sections': sections,
                     'preview_text': preview_text,
                     'file_count': len(sections),
-                    'preview_info': {
-                        'file_name': sections[0]['filename'] if sections else 'preview.md',
-                        'total_files': len(sections)
-                    },
                     'zip_ready': True
                 })
             else:
@@ -272,6 +327,28 @@ def download_file():
         # 清理上传文件
         if file_path.exists():
             file_path.unlink()
+
+
+@app.route('/api/section/<session_id>/<int:index>', methods=['GET'])
+def get_section_content(session_id: str, index: int):
+    """
+    获取指定切片的内容（从缓存中读取）
+
+    Args:
+        session_id: 会话ID
+        index: 切片索引
+    """
+    section = get_cached_sections(session_id, index)
+
+    if section is None:
+        return jsonify({'error': '会话不存在或切片索引无效'}), 404
+
+    return jsonify({
+        'success': True,
+        'index': section['index'],
+        'title': section['title'],
+        'content': section['content']
+    })
 
 
 if __name__ == '__main__':
