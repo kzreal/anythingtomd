@@ -3,8 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>任意文档转Markdown服务</title>
+    <title>文档转Markdown - anythingtomd</title>
     <style>
+        /* Design Tokens - Based on Design Context */
+        :root {
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --text-tertiary: #999999;
+
+            --bg-primary: #ffffff;
+            --bg-secondary: #f7f7f7;
+            --bg-tertiary: #e9e9e9;
+
+            --accent: #007aff;
+            --accent-hover: #0062cc;
+
+            --success: #22c55e;
+            --error: #ef4444;
+            --warning: #f59e0b;
+
+            --space-1: 4px;
+            --space-2: 8px;
+            --space-3: 12px;
+            --space-4: 16px;
+            --space-5: 20px;
+            --space-6: 24px;
+            --space-8: 32px;
+            --space-10: 40px;
+
+            --radius-sm: 4px;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+            --font-size-xs: 12px;
+            --font-size-sm: 14px;
+            --font-size-md: 16px;
+            --font-size-lg: 18px;
+            --font-size-xl: 24px;
+
+            --font-weight-normal: 400;
+            --font-weight-medium: 500;
+            --font-weight-semibold: 600;
+
+            --line-height-normal: 1.5;
+        }
+
+        /* Reset & Base */
         * {
             margin: 0;
             padding: 0;
@@ -12,72 +58,117 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: var(--font-family);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: var(--line-height-normal);
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--bg-tertiary);
+            padding: var(--space-4) var(--space-6);
+            display: flex;
             align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-semibold);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .logo-icon {
+            width: 24px;
+            height: 24px;
+            background: var(--accent);
+            border-radius: var(--radius-sm);
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            display: flex;
+            align-items: flex-start;
             justify-content: center;
-            padding: 20px;
+            padding: var(--space-8) var(--space-4);
         }
 
         .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            padding: 40px;
-            max-width: 900px;
+            background: var(--bg-primary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: var(--radius-lg);
+            padding: var(--space-10);
+            max-width: 720px;
             width: 100%;
         }
 
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-            text-align: center;
-            font-size: 28px;
+        .title {
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-semibold);
+            color: var(--text-primary);
+            margin-bottom: var(--space-6);
         }
 
+        /* Upload Area */
         .upload-area {
-            border: 3px dashed #667eea;
-            border-radius: 15px;
-            padding: 50px 20px;
+            border: 1px dashed var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            padding: var(--space-8) var(--space-4);
             text-align: center;
-            background: #f8f9ff;
-            transition: all 0.3s;
             cursor: pointer;
-            margin-bottom: 20px;
+            transition: border-color 0.15s ease, background-color 0.15s ease;
+            margin-bottom: var(--space-4);
         }
 
-        .upload-area:hover, .upload-area.dragover {
-            border-color: #764ba2;
-            background: #f0f2ff;
+        .upload-area:hover {
+            border-color: var(--text-tertiary);
+            background: var(--bg-secondary);
         }
 
-        .icon {
-            font-size: 48px;
-            margin-bottom: 15px;
+        .upload-area.dragover {
+            border-color: var(--accent);
+            background: rgba(0, 122, 255, 0.04);
         }
 
-        .text {
-            color: #666;
-            font-size: 16px;
+        .upload-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto var(--space-3);
+            opacity: 0.4;
         }
 
-        .subtext {
-            color: #999;
-            font-size: 14px;
-            margin-top: 8px;
+        .upload-text {
+            color: var(--text-primary);
+            font-size: var(--font-size-md);
+            font-weight: var(--font-weight-medium);
+        }
+
+        .upload-hint {
+            color: var(--text-tertiary);
+            font-size: var(--font-size-sm);
+            margin-top: var(--space-2);
         }
 
         #fileInput {
             display: none;
         }
 
+        /* File Info */
         #fileInfo {
-            background: #f0f2ff;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            padding: var(--space-4);
+            margin-bottom: var(--space-4);
             display: none;
         }
 
@@ -85,11 +176,24 @@
             display: block;
         }
 
+        .file-info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+            padding: var(--space-1) 0;
+        }
+
+        .file-info-row strong {
+            color: var(--text-primary);
+        }
+
+        /* Options Panel */
         #levelSelector, #excelInfo {
-            background: #f8f9ff;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
+            border: 1px solid var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            padding: var(--space-4);
+            margin-bottom: var(--space-4);
             display: none;
         }
 
@@ -97,23 +201,21 @@
             display: block;
         }
 
-        #levelSelector label, #excelInfo label {
-            display: block;
-            color: #666;
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 12px;
+        .panel-label {
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+            color: var(--text-secondary);
+            margin-bottom: var(--space-3);
         }
 
         .level-options {
             display: flex;
-            gap: 10px;
+            gap: var(--space-2);
             flex-wrap: wrap;
         }
 
         .level-option {
             cursor: pointer;
-            position: relative;
         }
 
         .level-option input[type="radio"] {
@@ -122,72 +224,79 @@
 
         .level-option span {
             display: inline-block;
-            padding: 10px 20px;
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            color: #666;
-            font-size: 14px;
-            transition: all 0.3s;
+            padding: var(--space-2) var(--space-4);
+            background: var(--bg-primary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-normal);
+            transition: all 0.15s ease;
         }
 
         .level-option input[type="radio"]:checked + span {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-color: #667eea;
-            color: white;
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--bg-primary);
         }
 
         .level-option:hover span {
-            border-color: #667eea;
+            border-color: var(--text-tertiary);
         }
 
+        /* Buttons */
         .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: var(--accent);
+            color: var(--bg-primary);
             border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-size: 16px;
+            padding: var(--space-3) var(--space-6);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-md);
+            font-weight: var(--font-weight-medium);
             cursor: pointer;
-            display: block;
-            margin: 20px auto 0;
-            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-2);
+            transition: background-color 0.15s ease;
         }
 
         .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            background: var(--accent-hover);
         }
 
         .btn:disabled {
-            background: #ccc;
+            background: var(--bg-tertiary);
+            color: var(--text-tertiary);
             cursor: not-allowed;
-            transform: none;
         }
 
         .btn-secondary {
-            background: #52C41A;
-            margin-top: 10px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--bg-tertiary);
         }
 
         .btn-secondary:hover {
-            background: #389e0d;
+            background: var(--bg-tertiary);
         }
 
-        .btn-copy {
-            background: #3498db;
-            padding: 8px 20px;
-            font-size: 14px;
-            margin-top: 10px;
-            margin-right: 10px;
+        .btn-icon {
+            padding: var(--space-2);
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-md);
         }
 
-        .btn-copy:hover {
-            background: #2980b9;
+        .btn-group {
+            display: flex;
+            gap: var(--space-2);
+            margin-top: var(--space-4);
         }
 
+        /* Progress */
         #progress {
-            margin-top: 20px;
+            margin-top: var(--space-4);
             display: none;
         }
 
@@ -196,21 +305,29 @@
         }
 
         .progress-bar {
-            background: #e0e0e0;
-            border-radius: 10px;
-            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            height: 4px;
             overflow: hidden;
         }
 
         .progress-fill {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--accent);
             height: 100%;
             width: 0%;
-            transition: width 0.3s;
+            transition: width 0.2s ease;
         }
 
+        .progress-text {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+            margin-top: var(--space-2);
+            text-align: center;
+        }
+
+        /* Result & Preview */
         #result {
-            margin-top: 20px;
+            margin-top: var(--space-4);
             display: none;
         }
 
@@ -219,156 +336,188 @@
         }
 
         .preview-section {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
+            border: 1px solid var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            overflow: hidden;
         }
 
         .preview-header {
+            background: var(--bg-secondary);
+            padding: var(--space-3) var(--space-4);
+            border-bottom: 1px solid var(--bg-tertiary);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
         }
 
         .preview-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
+            font-size: var(--font-size-md);
+            font-weight: var(--font-weight-medium);
+            color: var(--text-primary);
         }
 
         .preview-actions {
             display: flex;
-            gap: 10px;
+            gap: var(--space-2);
         }
 
         .preview-text {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            max-height: 500px;
+            background: var(--bg-primary);
+            padding: var(--space-4);
+            max-height: 480px;
             overflow-y: auto;
             white-space: pre-wrap;
-            font-family: 'Courier New', monospace;
+            font-family: ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', monospace;
+            font-size: var(--font-size-sm);
             line-height: 1.6;
-            font-size: 14px;
-            border: 1px solid #e0e0e0;
+            color: var(--text-secondary);
         }
 
-        .success {
-            background: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            margin-top: 20px;
+        .preview-text::-webkit-scrollbar {
+            width: 8px;
         }
 
-        .error {
-            background: #fff2f0;
-            color: #ff4d4f;
-            padding: 15px;
-            border-radius: 10px;
+        .preview-text::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
         }
 
+        .preview-text::-webkit-scrollbar-thumb {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-sm);
+        }
+
+        /* Messages */
         .message {
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
+            padding: var(--space-3) var(--space-4);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-sm);
+            margin-top: var(--space-4);
             display: none;
         }
 
         .message.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(34, 197, 94, 0.2);
         }
 
         .message.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.2);
         }
 
-        .copy-btn {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 5px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background 0.3s;
+        /* Footer */
+        .footer {
+            padding: var(--space-4);
+            text-align: center;
+            color: var(--text-tertiary);
+            font-size: var(--font-size-xs);
         }
 
-        .copy-btn:hover {
-            background: #2980b9;
+        /* Utility */
+        .divider {
+            border-top: 1px solid var(--bg-tertiary);
+            margin: var(--space-4) 0;
         }
 
-        .copy-btn.copied {
-            background: #27ae60;
+        .file-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-1);
+            padding: var(--space-1) var(--space-2);
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+            font-size: var(--font-size-xs);
+            color: var(--text-tertiary);
+        }
+
+        .success-icon {
+            width: 20px;
+            height: 20px;
+            color: var(--success);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>📄 任意文档转Markdown服务</h1>
-
-        <div class="upload-area" id="uploadArea">
-            <div class="icon">📁</div>
-            <div class="text">点击或拖拽上传文档</div>
-            <div class="subtext">支持 .docx, .xlsx, .xls 格式，最大 1GB</div>
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon"></div>
+            anythingtomd
         </div>
+    </header>
 
-        <input type="file" id="fileInput" accept=".docx,.xlsx,.xls">
+    <main class="main">
+        <div class="container">
+            <h1 class="title">文档转 Markdown</h1>
 
-        <div id="fileInfo"></div>
-
-        <div id="levelSelector">
-            <label>切分层级（仅Word文档）</label>
-            <div class="level-options">
-                <label class="level-option">
-                    <input type="radio" name="sliceLevel" value="0">
-                    <span>零级</span>
-                </label>
-                <label class="level-option">
-                    <input type="radio" name="sliceLevel" value="1">
-                    <span>一级</span>
-                </label>
-                <label class="level-option">
-                    <input type="radio" name="sliceLevel" value="2" checked>
-                    <span>二级</span>
-                </label>
-                <label class="level-option">
-                    <input type="radio" name="sliceLevel" value="3">
-                    <span>三级</span>
-                </label>
-                <label class="level-option">
-                    <input type="radio" name="sliceLevel" value="all">
-                    <span>全部</span>
-                </label>
+            <div class="upload-area" id="uploadArea">
+                <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                <div class="upload-text">点击或拖拽上传文件</div>
+                <div class="upload-hint">支持 .docx, .xlsx, .xls 格式</div>
             </div>
-        </div>
 
-        <div id="excelInfo">
-            <label>Excel转换选项</label>
-            <p style="color: #666; font-size: 14px;">每个sheet将转换为独立的Markdown文件，并包含行编号。</p>
-        </div>
+            <input type="file" id="fileInput" accept=".docx,.xlsx,.xls">
 
-        <button class="btn" id="convertBtn" disabled>开始转换</button>
+            <div id="fileInfo"></div>
 
-        <div id="progress">
-            <div style="text-align: center; color: #666; margin-bottom: 8px;" id="progressText">准备中...</div>
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
+            <div id="levelSelector">
+                <div class="panel-label">切分层级（仅 Word 文档）</div>
+                <div class="level-options">
+                    <label class="level-option">
+                        <input type="radio" name="sliceLevel" value="0">
+                        <span>零级</span>
+                    </label>
+                    <label class="level-option">
+                        <input type="radio" name="sliceLevel" value="1">
+                        <span>一级</span>
+                    </label>
+                    <label class="level-option">
+                        <input type="radio" name="sliceLevel" value="2" checked>
+                        <span>二级</span>
+                    </label>
+                    <label class="level-option">
+                        <input type="radio" name="sliceLevel" value="3">
+                        <span>三级</span>
+                    </label>
+                    <label class="level-option">
+                        <input type="radio" name="sliceLevel" value="all">
+                        <span>全部</span>
+                    </label>
+                </div>
             </div>
+
+            <div id="excelInfo">
+                <div class="panel-label">Excel 转换选项</div>
+                <div style="font-size: var(--font-size-sm); color: var(--text-secondary);">
+                    每个 sheet 将转换为独立的 Markdown 文件，并包含行编号。
+                </div>
+            </div>
+
+            <button class="btn" id="convertBtn" disabled>
+                开始转换
+            </button>
+
+            <div id="progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">准备中...</div>
+            </div>
+
+            <div id="result"></div>
+
+            <div class="message" id="message"></div>
         </div>
+    </main>
 
-        <div id="result"></div>
-
-        <div class="message" id="message"></div>
-    </div>
+    <footer class="footer">
+        任意文档转 Markdown 服务
+    </footer>
 
     <script>
         const uploadArea = document.getElementById('uploadArea');
@@ -420,7 +569,6 @@
 
             selectedFile = file;
 
-            // 先分析文件
             const formData = new FormData();
             formData.append('file', file);
 
@@ -434,15 +582,25 @@
 
                 if (data.success) {
                     fileType = data.file_type;
+                    const fileBadge = fileType === 'word' ? 'DOCX' : 'XLSX';
+                    const sizeFormatted = (data.file_size / 1024 / 1024).toFixed(2) + ' MB';
 
                     fileInfo.innerHTML = `
-                        <strong>文件名:</strong> ${data.filename}<br>
-                        <strong>文件大小:</strong> ${(data.file_size / 1024 / 1024).toFixed(2)} MB<br>
-                        <strong>文件类型:</strong> ${data.file_type === 'word' ? 'Word文档' : 'Excel表格'}
+                        <div class="file-info-row">
+                            <span><strong>文件名</strong></span>
+                            <span>${data.filename}</span>
+                        </div>
+                        <div class="file-info-row">
+                            <span><strong>大小</strong></span>
+                            <span>${sizeFormatted}</span>
+                        </div>
+                        <div class="file-info-row">
+                            <span><strong>类型</strong></span>
+                            <span><span class="file-badge">${fileBadge}</span></span>
+                        </div>
                     `;
                     fileInfo.classList.add('show');
 
-                    // 显示对应的选项
                     if (data.file_type === 'word') {
                         levelSelector.classList.add('show');
                         excelInfo.classList.remove('show');
@@ -454,6 +612,7 @@
                     convertBtn.disabled = false;
                     result.innerHTML = '';
                     result.classList.remove('show');
+                    message.style.display = 'none';
                 } else {
                     showError(data.error);
                 }
@@ -462,15 +621,15 @@
             }
         }
 
-         convertBtn.addEventListener('click', async () => {
+        convertBtn.addEventListener('click', async () => {
             if (!selectedFile) return;
 
             progress.classList.add('show');
             result.innerHTML = '';
             result.classList.remove('show');
             convertBtn.disabled = true;
+            message.style.display = 'none';
 
-            // 获取选项
             const options = {};
             if (fileType === 'word') {
                 const level = document.querySelector('input[name="sliceLevel"]:checked').value;
@@ -481,7 +640,6 @@
             formData.append('file', selectedFile);
             formData.append('options', JSON.stringify(options));
 
-            // Word：直接下载，Excel：预览模式
             const mode = (fileType === 'word') ? 'download' : 'preview';
             formData.append('mode', mode);
 
@@ -493,15 +651,10 @@
                     body: formData
                 });
 
-                // 检查响应类型
-                const contentType = response.headers.get('content-type');
-
                 if (fileType === 'word') {
-                    // Word：响应是ZIP文件
                     if (response.ok) {
                         const blob = await response.blob();
                         const url = URL.createObjectURL(blob);
-                        
                         const a = document.createElement('a');
                         a.href = url;
                         a.download = `converted_${selectedFile.name}.zip`;
@@ -510,28 +663,17 @@
                         document.body.removeChild(a);
                         URL.revokeObjectURL(url);
 
-                        updateProgress(100, '转换完成！');
-
-                        // 显示下载成功信息
-                        result.innerHTML = `
-                            <div class="success">
-                                ✅ Word文档转换成功！<br>
-                                ZIP文件已开始下载，共 ${selectedFile.name}
-                            </div>
-                        `;
-                        result.classList.add('show');
+                        updateProgress(100, '转换完成');
+                        showSuccess('Word 文档转换成功，ZIP 已下载');
                     } else {
                         const data = await response.json();
                         showError(data.error || '下载失败');
                     }
                 } else {
-                    // Excel：响应是JSON（预览模式）
                     const data = await response.json();
 
                     if (data.success) {
-                        updateProgress(100, '转换完成！');
-
-                        // 显示预览
+                        updateProgress(100, '转换完成');
                         showPreview(data);
                     } else {
                         showError(data.error);
@@ -545,29 +687,25 @@
             }
         });
 
-         function showPreview(data) {
-             // 只对Excel显示预览，Word已经在转换按钮中处理了下载
-             if (fileType === 'word') {
-                 return;
-             }
-
-             result.innerHTML = `
-                 <div class="preview-section">
-                     <div class="preview-header">
-                         <div class="preview-title">转换结果预览</div>
-                         <div class="preview-actions">
-                             <button class="copy-btn" onclick="copyContent()">📋 复制内容</button>
-                             <button class="btn" onclick="downloadZip()">📥 下载ZIP</button>
-                         </div>
-                     </div>
-                     <div class="preview-text" id="previewText">${escapeHtml(data.preview_text)}</div>
-                 </div>
-                 <div class="success">
-                     ✅ 转换成功！共 ${data.file_count} 个文件
-                 </div>
-             `;
-             result.classList.add('show');
-         }
+        function showPreview(data) {
+            result.innerHTML = `
+                <div class="preview-section">
+                    <div class="preview-header">
+                        <span class="preview-title">转换结果</span>
+                        <div class="preview-actions">
+                            <button class="btn btn-secondary" onclick="copyContent()">
+                                复制
+                            </button>
+                            <button class="btn" onclick="downloadZip()">
+                                下载 ZIP
+                            </button>
+                        </div>
+                    </div>
+                    <div class="preview-text" id="previewText">${escapeHtml(data.preview_text)}</div>
+                </div>
+            `;
+            result.classList.add('show');
+        }
 
         function copyContent() {
             const previewText = document.getElementById('previewText');
@@ -575,7 +713,7 @@
 
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(text).then(() => {
-                    showSuccess('✓ 内容已复制到剪贴板');
+                    showSuccess('已复制到剪贴板');
                 }).catch(() => {
                     fallbackCopy(text);
                 });
@@ -593,7 +731,7 @@
 
             try {
                 document.execCommand('copy');
-                showSuccess('✓ 内容已复制到剪贴板');
+                showSuccess('已复制到剪贴板');
             } catch (err) {
                 showError('复制失败，请手动复制');
             }
@@ -604,7 +742,6 @@
         async function downloadZip() {
             if (!selectedFile) return;
 
-            // 获取选项
             const options = {};
             if (fileType === 'word') {
                 const level = document.querySelector('input[name="sliceLevel"]:checked').value;
@@ -631,7 +768,7 @@
                     a.click();
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
-                    showSuccess('✓ 文件下载成功');
+                    showSuccess('下载成功');
                 } else {
                     const data = await response.json();
                     showError(data.error || '下载失败');
