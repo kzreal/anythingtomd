@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任意文档转Markdown服务</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 28px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 50px 20px;
+            text-align: center;
+            background: #f8f9ff;
+            transition: all 0.3s;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .text {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .subtext {
+            color: #999;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        #fileInfo {
+            background: #f0f2ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        #fileInfo.show {
+            display: block;
+        }
+
+        #levelSelector, #excelInfo {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        #levelSelector.show, #excelInfo.show {
+            display: block;
+        }
+
+        #levelSelector label, #excelInfo label {
+            display: block;
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .level-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .level-option {
+            cursor: pointer;
+            position: relative;
+        }
+
+        .level-option input[type="radio"] {
+            display: none;
+        }
+
+        .level-option span {
+            display: inline-block;
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            color: #666;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .level-option input[type="radio"]:checked + span {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: white;
+        }
+
+        .level-option:hover span {
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto 0;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #52C41A;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #389e0d;
+        }
+
+        .btn-copy {
+            background: #3498db;
+            padding: 8px 20px;
+            font-size: 14px;
+            margin-top: 10px;
+            margin-right: 10px;
+        }
+
+        .btn-copy:hover {
+            background: #2980b9;
+        }
+
+        #progress {
+            margin-top: 20px;
+            display: none;
+        }
+
+        #progress.show {
+            display: block;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        #result {
+            margin-top: 20px;
+            display: none;
+        }
+
+        #result.show {
+            display: block;
+        }
+
+        .preview-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .preview-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .preview-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .preview-text {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 500px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            font-size: 14px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .error {
+            background: #fff2f0;
+            color: #ff4d4f;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .copy-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: #2980b9;
+        }
+
+        .copy-btn.copied {
+            background: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📄 任意文档转Markdown服务</h1>
+
+        <div class="upload-area" id="uploadArea">
+            <div class="icon">📁</div>
+            <div class="text">点击或拖拽上传文档</div>
+            <div class="subtext">支持 .docx, .xlsx, .xls 格式，最大 1GB</div>
+        </div>
+
+        <input type="file" id="fileInput" accept=".docx,.xlsx,.xls">
+
+        <div id="fileInfo"></div>
+
+        <div id="levelSelector">
+            <label>切分层级（仅Word文档）</label>
+            <div class="level-options">
+                <label class="level-option">
+                    <input type="radio" name="sliceLevel" value="0">
+                    <span>零级</span>
+                </label>
+                <label class="level-option">
+                    <input type="radio" name="sliceLevel" value="1">
+                    <span>一级</span>
+                </label>
+                <label class="level-option">
+                    <input type="radio" name="sliceLevel" value="2" checked>
+                    <span>二级</span>
+                </label>
+                <label class="level-option">
+                    <input type="radio" name="sliceLevel" value="3">
+                    <span>三级</span>
+                </label>
+                <label class="level-option">
+                    <input type="radio" name="sliceLevel" value="all">
+                    <span>全部</span>
+                </label>
+            </div>
+        </div>
+
+        <div id="excelInfo">
+            <label>Excel转换选项</label>
+            <p style="color: #666; font-size: 14px;">每个sheet将转换为独立的Markdown文件，并包含行编号。</p>
+        </div>
+
+        <button class="btn" id="convertBtn" disabled>开始转换</button>
+
+        <div id="progress">
+            <div style="text-align: center; color: #666; margin-bottom: 8px;" id="progressText">准备中...</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <div id="result"></div>
+
+        <div class="message" id="message"></div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const convertBtn = document.getElementById('convertBtn');
+        const levelSelector = document.getElementById('levelSelector');
+        const excelInfo = document.getElementById('excelInfo');
+        const progress = document.getElementById('progress');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const result = document.getElementById('result');
+        const message = document.getElementById('message');
+
+        let selectedFile = null;
+        let fileType = null;
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        async function handleFile(file) {
+            const MAX_SIZE = 1024 * 1024 * 1024;
+            if (file.size > MAX_SIZE) {
+                showError('文件大小超过 1GB 限制');
+                return;
+            }
+
+            selectedFile = file;
+
+            // 先分析文件
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    fileType = data.file_type;
+
+                    fileInfo.innerHTML = `
+                        <strong>文件名:</strong> ${data.filename}<br>
+                        <strong>文件大小:</strong> ${(data.file_size / 1024 / 1024).toFixed(2)} MB<br>
+                        <strong>文件类型:</strong> ${data.file_type === 'word' ? 'Word文档' : 'Excel表格'}
+                    `;
+                    fileInfo.classList.add('show');
+
+                    // 显示对应的选项
+                    if (data.file_type === 'word') {
+                        levelSelector.classList.add('show');
+                        excelInfo.classList.remove('show');
+                    } else {
+                        levelSelector.classList.remove('show');
+                        excelInfo.classList.add('show');
+                    }
+
+                    convertBtn.disabled = false;
+                    result.innerHTML = '';
+                    result.classList.remove('show');
+                } else {
+                    showError(data.error);
+                }
+            } catch (error) {
+                showError('文件分析失败: ' + error.message);
+            }
+        }
+
+         convertBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+
+            progress.classList.add('show');
+            result.innerHTML = '';
+            result.classList.remove('show');
+            convertBtn.disabled = true;
+
+            // 获取选项
+            const options = {};
+            if (fileType === 'word') {
+                const level = document.querySelector('input[name="sliceLevel"]:checked').value;
+                options.max_level = level;
+            }
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('options', JSON.stringify(options));
+
+            // Word：直接下载，Excel：预览模式
+            const mode = (fileType === 'word') ? 'download' : 'preview';
+            formData.append('mode', mode);
+
+            try {
+                updateProgress(50, '转换中...');
+
+                const response = await fetch('/api/convert', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                // 检查响应类型
+                const contentType = response.headers.get('content-type');
+
+                if (fileType === 'word') {
+                    // Word：响应是ZIP文件
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        const url = URL.createObjectURL(blob);
+                        
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `converted_${selectedFile.name}.zip`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+
+                        updateProgress(100, '转换完成！');
+
+                        // 显示下载成功信息
+                        result.innerHTML = `
+                            <div class="success">
+                                ✅ Word文档转换成功！<br>
+                                ZIP文件已开始下载，共 ${selectedFile.name}
+                            </div>
+                        `;
+                        result.classList.add('show');
+                    } else {
+                        const data = await response.json();
+                        showError(data.error || '下载失败');
+                    }
+                } else {
+                    // Excel：响应是JSON（预览模式）
+                    const data = await response.json();
+
+                    if (data.success) {
+                        updateProgress(100, '转换完成！');
+
+                        // 显示预览
+                        showPreview(data);
+                    } else {
+                        showError(data.error);
+                    }
+                }
+            } catch (error) {
+                showError('转换失败: ' + error.message);
+            } finally {
+                progress.classList.remove('show');
+                convertBtn.disabled = false;
+            }
+        });
+
+         function showPreview(data) {
+             // 只对Excel显示预览，Word已经在转换按钮中处理了下载
+             if (fileType === 'word') {
+                 return;
+             }
+
+             result.innerHTML = `
+                 <div class="preview-section">
+                     <div class="preview-header">
+                         <div class="preview-title">转换结果预览</div>
+                         <div class="preview-actions">
+                             <button class="copy-btn" onclick="copyContent()">📋 复制内容</button>
+                             <button class="btn" onclick="downloadZip()">📥 下载ZIP</button>
+                         </div>
+                     </div>
+                     <div class="preview-text" id="previewText">${escapeHtml(data.preview_text)}</div>
+                 </div>
+                 <div class="success">
+                     ✅ 转换成功！共 ${data.file_count} 个文件
+                 </div>
+             `;
+             result.classList.add('show');
+         }
+
+        function copyContent() {
+            const previewText = document.getElementById('previewText');
+            const text = previewText.textContent;
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showSuccess('✓ 内容已复制到剪贴板');
+                }).catch(() => {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            document.body.appendChild(textarea);
+            textarea.select();
+
+            try {
+                document.execCommand('copy');
+                showSuccess('✓ 内容已复制到剪贴板');
+            } catch (err) {
+                showError('复制失败，请手动复制');
+            }
+
+            document.body.removeChild(textarea);
+        }
+
+        async function downloadZip() {
+            if (!selectedFile) return;
+
+            // 获取选项
+            const options = {};
+            if (fileType === 'word') {
+                const level = document.querySelector('input[name="sliceLevel"]:checked').value;
+                options.max_level = level;
+            }
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('options', JSON.stringify(options));
+
+            try {
+                const response = await fetch('/api/download', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `converted_${selectedFile.name}.zip`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    showSuccess('✓ 文件下载成功');
+                } else {
+                    const data = await response.json();
+                    showError(data.error || '下载失败');
+                }
+            } catch (error) {
+                showError('下载失败: ' + error.message);
+            }
+        }
+
+        function showError(text) {
+            message.textContent = text;
+            message.className = 'message error';
+            message.style.display = 'block';
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(text) {
+            message.textContent = text;
+            message.className = 'message success';
+            message.style.display = 'block';
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 3000);
+        }
+
+        function updateProgress(value, text) {
+            progressFill.style.width = value + '%';
+            progressText.textContent = text;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

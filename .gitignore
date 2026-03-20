@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Environment
+.env
+.venv/
+venv/
+
+# Logs
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# Test results
+test_results/
+test-*.png
+
+# Temporary files
+*.backup
+uploads/
+downloads/
+*.xlsx
+
+# Large files
+商务文件.docx
