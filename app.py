@@ -18,6 +18,7 @@ import config
 from utils.file_detector import detect_file_type, is_allowed_file
 from converters.word_converter import WordConverter
 from converters.excel_converter import ExcelConverter
+from services.qwen_ocr_service import QwenOCRService
 
 # 日志配置
 logging.basicConfig(
@@ -42,6 +43,17 @@ logger.info(f"LLM服务可用: {config.LLM_AVAILABLE}")
 if config.LLM_AVAILABLE:
     logger.info(f"LLM端点: {config.LLM_API_ENDPOINT[:50]}...")
 logger.info(f"下载路径: {config.DOWNLOAD_FOLDER}")
+
+# 初始化千问 OCR 服务
+qwen_ocr_service = None
+if config.QWEN_VL_API_KEY:
+    qwen_ocr_service = QwenOCRService(
+        api_key=config.QWEN_VL_API_KEY,
+        base_url=config.QWEN_VL_BASE_URL
+    )
+    logger.info("千问 OCR 服务已启用")
+else:
+    logger.warning("千问 OCR 服务未启用：缺少 API Key")
 
 # 全局缓存字典
 conversion_cache = {}
@@ -102,20 +114,38 @@ def analyze_file():
     if 'file' not in request.files:
         return jsonify({'error': '未上传文件'}), 400
 
-    file = request.files['file']
+    files = request.files.getlist('file')
+    if not files:
+        return jsonify({'error': '未上传文件'}), 400
+
+    # 获取第一个文件用于分析
+    file = files[0]
     if file.filename == '':
         return jsonify({'error': '文件名为空'}), 400
 
     if not is_allowed_file(file.filename):
-        return jsonify({'error': '不支持的文件格式，仅支持 .docx, .xlsx, .xls'}), 400
+        return jsonify({'error': '不支持的文件格式，仅支持 .docx, .xlsx, .xls, .pdf, .png, .jpg, .jpeg'}), 400
 
+    # 保存文件到磁盘（在获取 content_length 之前）
+    import time
+    timestamp = str(int(time.time()))
+    saved_path = config.UPLOAD_FOLDER / f"{timestamp}_{file.filename}"
+    file.save(str(saved_path))
+
+    # 获取文件类型
     file_type = detect_file_type(file.filename)
+
+    # 获取保存后的文件大小
+    import os
+    saved_size = os.path.getsize(saved_path) if os.path.exists(saved_path) else 0
 
     result = {
         'success': True,
         'file_type': file_type,
         'filename': file.filename,
-        'file_size': file.content_length,
+        'file_size': saved_size,
+        'file_count': len(files),  # 文件数量（用于多图）
+        'saved_path': str(saved_path)
     }
 
     # 添加文件类型特定信息
@@ -128,6 +158,14 @@ def analyze_file():
     elif file_type == 'excel':
         result['excel_options'] = {
             'description': '每个sheet将转换为独立的Markdown文件'
+        }
+    elif file_type == 'pdf':
+        result['pdf_options'] = {
+            'description': 'PDF 将按页转换为 Markdown，每页作为一个独立文件'
+        }
+    elif file_type == 'image':
+        result['image_options'] = {
+            'description': '图片将通过千问 OCR 识别转换为 Markdown，仅支持单张图片'
         }
 
     return jsonify(result)
@@ -163,13 +201,19 @@ def convert_file():
     except json.JSONDecodeError:
         options = {}
 
-    # 保存文件（使用原始文件名）
-    filename = file.filename
-    # 添加时间戳避免文件名冲突
-    timestamp = str(int(time.time()))
-    safe_filename = f"{timestamp}_{filename}"
-    file_path = config.UPLOAD_FOLDER / safe_filename
-    file.save(str(file_path))
+    # 从表单中获取已保存的文件路径（如果有的话）
+    saved_path_str = request.form.get('saved_path')
+    if saved_path_str:
+        file_path = Path(saved_path_str)
+        logger.info(f"使用已保存的文件: {file_path}")
+    else:
+        # 如果没有已保存的路径，保存文件
+        filename = file.filename
+        # 添加时间戳避免文件名冲突
+        timestamp = str(int(time.time()))
+        safe_filename = f"{timestamp}_{filename}"
+        file_path = config.UPLOAD_FOLDER / safe_filename
+        file.save(str(file_path))
 
     logger.info(f"开始转换文件: {filename}, 模式: {mode}, 选项: {options}")
 
@@ -181,6 +225,17 @@ def convert_file():
             converter = WordConverter(str(file_path))
         elif file_type == 'excel':
             converter = ExcelConverter(str(file_path))
+        elif file_type == 'pdf':
+            if qwen_ocr_service is None:
+                return jsonify({'error': '千问 OCR 服务未启用，请配置 QWEN_VL_API_KEY'}), 500
+            from converters.pdf_converter import PDFConverter
+            converter = PDFConverter(str(file_path), qwen_ocr_service)
+        elif file_type == 'image':
+            if qwen_ocr_service is None:
+                return jsonify({'error': '千问 OCR 服务未启用，请配置 QWEN_VL_API_KEY'}), 500
+            # 图片文件已经在前面保存到 file_path
+            from converters.image_converter import ImageConverter
+            converter = ImageConverter(str(file_path), qwen_ocr_service)
         else:
             return jsonify({'error': '不支持的文件类型'}), 400
 
@@ -216,7 +271,7 @@ def convert_file():
                     as_attachment=True,
                     download_name=f"converted_{filename}.zip"
                 )
-        else:
+        elif file_type == 'excel':
             # Excel：预览模式或下载模式
             if mode == 'preview':
                 # 预览模式：返回 JSON
@@ -248,12 +303,42 @@ def convert_file():
                     as_attachment=True,
                     download_name=f"converted_{filename}.zip"
                 )
+        elif file_type in ['pdf', 'image']:
+            # PDF/图片：预览模式或下载模式
+            if mode == 'preview':
+                preview_text, sections_info = converter.get_preview_text(options)
+
+                # 生成会话ID并缓存
+                session_id = get_session_id()
+                cache_conversion(session_id, sections_info, options, file_type)
+
+                return jsonify({
+                    'success': True,
+                    'session_id': session_id,
+                    'sections': sections_info,
+                    'preview_text': preview_text,
+                    'file_count': len(sections_info),
+                    'zip_ready': True
+                })
+            else:
+                # 下载模式：返回ZIP文件
+                zip_path = converter.convert(options)
+                converter.cleanup()
+
+                safe_filename = quote(f"converted_{filename}.zip", safe='')
+
+                return send_file(
+                    zip_path,
+                    mimetype='application/zip',
+                    as_attachment=True,
+                    download_name=f"converted_{filename}.zip"
+                )
 
     except Exception as e:
         logger.error(f"转换失败: {str(e)}", exc_info=True)
         return jsonify({'error': f'转换失败: {str(e)}'}), 500
     finally:
-        # 清理上传文件
+        # 清理上传文件（图片文件由 ImageConverter.cleanup() 负责删除）
         if file_path.exists():
             file_path.unlink()
 
@@ -304,6 +389,17 @@ def download_file():
             converter = WordConverter(str(file_path))
         elif file_type == 'excel':
             converter = ExcelConverter(str(file_path))
+        elif file_type == 'pdf':
+            if qwen_ocr_service is None:
+                return jsonify({'error': '千问 OCR 服务未启用，请配置 QWEN_VL_API_KEY'}), 500
+            from converters.pdf_converter import PDFConverter
+            converter = PDFConverter(str(file_path), qwen_ocr_service)
+        elif file_type == 'image':
+            if qwen_ocr_service is None:
+                return jsonify({'error': '千问 OCR 服务未启用，请配置 QWEN_VL_API_KEY'}), 500
+            # 图片文件已经在前面保存到 file_path
+            from converters.image_converter import ImageConverter
+            converter = ImageConverter(str(file_path), qwen_ocr_service)
         else:
             return jsonify({'error': '不支持的文件类型'}), 400
 

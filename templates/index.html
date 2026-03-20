@@ -3,25 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>文档转Markdown - anythingtomd</title>
+    <title>AlltoMarkdown</title>
     <style>
-        /* Design Tokens - Based on Design Context */
+        /* Design Tokens - Enhanced Color Palette */
         :root {
-            --text-primary: #1a1a1a;
-            --text-secondary: #666666;
-            --text-tertiary: #999999;
+            /* Colors */
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --text-tertiary: #9ca3af;
 
             --bg-primary: #ffffff;
-            --bg-secondary: #f7f7f7;
-            --bg-tertiary: #e9e9e9;
+            --bg-secondary: #f9fafb;
+            --bg-tertiary: #f3f4f6;
+            --bg-elevated: #ffffff;
 
-            --accent: #007aff;
-            --accent-hover: #0062cc;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --accent-light: #e0e7ff;
+            --accent-subtle: #c7d2fe;
 
-            --success: #22c55e;
+            --success: #10b981;
+            --success-light: #d1fae5;
             --error: #ef4444;
+            --error-light: #fee2e2;
             --warning: #f59e0b;
+            --warning-light: #fef3c7;
 
+            /* Gradients */
+            --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --gradient-success: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+
+            /* Spacing */
             --space-1: 4px;
             --space-2: 8px;
             --space-3: 12px;
@@ -30,24 +42,47 @@
             --space-6: 24px;
             --space-8: 32px;
             --space-10: 40px;
+            --space-12: 48px;
+            --space-16: 64px;
 
-            --radius-sm: 4px;
-            --radius-md: 6px;
-            --radius-lg: 8px;
+            /* Radius */
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --radius-full: 9999px;
 
-            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            /* Typography */
+            --font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            --font-mono: 'SF Mono', 'SF Mono Regular', 'SF Mono', Consolas, 'Liberation Mono', Monaco, monospace;
 
             --font-size-xs: 12px;
             --font-size-sm: 14px;
-            --font-size-md: 16px;
-            --font-size-lg: 18px;
-            --font-size-xl: 24px;
+            --font-size-md: 15px;
+            --font-size-lg: 16px;
+            --font-size-xl: 20px;
+            --font-size-2xl: 24px;
+            --font-size-3xl: 30px;
 
             --font-weight-normal: 400;
             --font-weight-medium: 500;
             --font-weight-semibold: 600;
+            --font-weight-bold: 700;
 
+            --line-height-tight: 1.25;
             --line-height-normal: 1.5;
+            --line-height-relaxed: 1.75;
+
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+            /* Transitions */
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         /* Reset & Base */
@@ -91,6 +126,12 @@
             height: 24px;
             background: var(--accent);
             border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
         }
 
         /* Main Content - 左右分栏 */
@@ -106,30 +147,32 @@
         /* 左侧面板 */
         .left-panel {
             background: var(--bg-primary);
-            border: 1px solid var(--bg-tertiary);
+            border: 2px solid #e0e0e0;
             border-radius: var(--radius-lg);
             padding: var(--space-6);
             max-height: calc(100vh - 120px);
             overflow-y: auto;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }
 
         /* 右侧面板 */
         .right-panel {
             background: var(--bg-primary);
-            border: 1px solid var(--bg-tertiary);
+            border: 2px solid #e0e0e0;
             border-radius: var(--radius-lg);
-            min-height: calc(100vh - 120px);
+            height: calc(100vh - 120px);
             display: grid;
             grid-template-columns: 240px 1fr;
             overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }
 
         /* 右侧-切片列表 */
         .section-list {
-            background: var(--bg-secondary);
-            border-right: 1px solid var(--bg-tertiary);
+            background: #f5f5f5;
+            border-right: 2px solid #e0e0e0;
             overflow-y: auto;
-            max-height: calc(100vh - 120px);
+            height: 100%;
         }
 
         .section-item {
@@ -153,8 +196,10 @@
 
         /* 右侧-预览内容 */
         .preview-panel {
-            overflow-y: auto;
-            max-height: calc(100vh - 120px);
+            overflow: hidden;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
 
         .title {
@@ -166,23 +211,26 @@
 
         /* Upload Area */
         .upload-area {
-            border: 1px dashed var(--bg-tertiary);
+            border: 2px dashed #d0d0d0;
             border-radius: var(--radius-md);
             padding: var(--space-8) var(--space-4);
             text-align: center;
             cursor: pointer;
-            transition: border-color 0.15s ease, background-color 0.15s ease;
+            transition: all 0.2s ease;
             margin-bottom: var(--space-4);
+            background: #fafafa;
         }
 
         .upload-area:hover {
-            border-color: var(--text-tertiary);
-            background: var(--bg-secondary);
+            border-color: var(--accent);
+            background: #f0f4ff;
+            transform: translateY(-1px);
         }
 
         .upload-area.dragover {
             border-color: var(--accent);
-            background: rgba(0, 122, 255, 0.04);
+            background: #e6f0ff;
+            border-style: solid;
         }
 
         .upload-icon {
@@ -295,26 +343,36 @@
             background: var(--accent);
             color: var(--bg-primary);
             border: none;
-            padding: var(--space-3) var(--space-6);
+            padding: var(--space-4) var(--space-8);
             border-radius: var(--radius-md);
             font-size: var(--font-size-md);
-            font-weight: var(--font-weight-medium);
+            font-weight: var(--font-weight-semibold);
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: var(--space-2);
-            transition: background-color 0.15s ease;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0, 122, 255, 0.3);
         }
 
-        .btn:hover {
+        .btn:hover:not(:disabled) {
             background: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(0, 122, 255, 0.3);
         }
 
         .btn:disabled {
             background: var(--bg-tertiary);
             color: var(--text-tertiary);
             cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
         }
 
         .btn-secondary {
@@ -350,25 +408,44 @@
             display: block;
         }
 
-        .progress-bar {
-            background: var(--bg-tertiary);
+        .progress-container {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
             border-radius: var(--radius-md);
-            height: 4px;
+            padding: var(--space-4);
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 8px;
             overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         .progress-fill {
-            background: var(--accent);
+            background: linear-gradient(90deg, var(--accent) 0%, #4dabf7 100%);
             height: 100%;
             width: 0%;
-            transition: width 0.2s ease;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 122, 255, 0.4);
         }
 
         .progress-text {
             font-size: var(--font-size-sm);
             color: var(--text-secondary);
-            margin-top: var(--space-2);
+            margin-top: var(--space-3);
             text-align: center;
+            font-weight: var(--font-weight-medium);
+        }
+
+        .progress-container {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: var(--radius-md);
+            padding: var(--space-4);
+            margin-top: var(--space-4);
         }
 
         /* Result & Preview */
@@ -382,15 +459,19 @@
         }
 
         .preview-section {
-            border: 1px solid var(--bg-tertiary);
+            border: 2px solid #e0e0e0;
             border-radius: var(--radius-md);
             overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+            flex: 1;
         }
 
         .preview-header {
-            background: var(--bg-secondary);
+            background: #f5f5f5;
             padding: var(--space-3) var(--space-4);
-            border-bottom: 1px solid var(--bg-tertiary);
+            border-bottom: 2px solid #e0e0e0;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -410,7 +491,7 @@
         .preview-text {
             background: var(--bg-primary);
             padding: var(--space-4);
-            max-height: 480px;
+            flex: 1;
             overflow-y: auto;
             white-space: pre-wrap;
             font-family: ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', monospace;
@@ -488,15 +569,15 @@
 <body>
     <header class="header">
         <div class="logo">
-            <div class="logo-icon"></div>
-            anythingtomd
+            <div class="logo-icon">M</div>
+            AlltoMarkdown
         </div>
     </header>
 
     <main class="main">
         <!-- 左侧面板 -->
         <div class="left-panel">
-            <h1 class="title">文档转 Markdown</h1>
+            <h1 class="title">AlltoMarkdown</h1>
 
             <div class="upload-area" id="uploadArea">
                 <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -505,10 +586,10 @@
                     <line x1="12" y1="3" x2="12" y2="15"/>
                 </svg>
                 <div class="upload-text">点击或拖拽上传文件</div>
-                <div class="upload-hint">支持 .docx, .xlsx, .xls 格式</div>
+                <div class="upload-hint">支持 .docx, .xlsx, .xls, .pdf, .png, .jpg, .jpeg 格式</div>
             </div>
 
-            <input type="file" id="fileInput" accept=".docx,.xlsx,.xls">
+            <input type="file" id="fileInput" accept=".docx,.xlsx,.xls,.pdf,.png,.jpg,.jpeg">
 
             <div id="fileInfo"></div>
 
@@ -538,22 +619,21 @@
                 </div>
             </div>
 
-            <div id="excelInfo">
-                <div class="panel-label">Excel 转换选项</div>
-                <div style="font-size: var(--font-size-sm); color: var(--text-secondary);">
-                    每个 sheet 将转换为独立的 Markdown 文件，并包含行编号。
-                </div>
-            </div>
+            <div id="excelInfo" style="display: none;"></div>
+            <div id="pdfInfo" style="display: none;"></div>
+            <div id="imageInfo" style="display: none;"></div>
 
             <button class="btn" id="convertBtn" disabled>
                 开始转换
             </button>
 
             <div id="progress">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">准备中...</div>
                 </div>
-                <div class="progress-text" id="progressText">准备中...</div>
             </div>
 
             <div id="result"></div>
@@ -583,7 +663,7 @@
     </main>
 
     <footer class="footer">
-        任意文档转 Markdown 服务
+        AlltoMarkdown - 任意文档转 Markdown
     </footer>
 
     <script>
@@ -593,6 +673,8 @@
         const convertBtn = document.getElementById('convertBtn');
         const levelSelector = document.getElementById('levelSelector');
         const excelInfo = document.getElementById('excelInfo');
+        const pdfInfo = document.getElementById('pdfInfo');
+        const imageInfo = document.getElementById('imageInfo');
         const progress = document.getElementById('progress');
         const progressFill = document.getElementById('progressFill');
         const progressText = document.getElementById('progressText');
@@ -620,17 +702,25 @@
             e.preventDefault();
             uploadArea.classList.remove('dragover');
             if (e.dataTransfer.files.length > 0) {
-                handleFile(e.dataTransfer.files[0]);
+                handleFiles(e.dataTransfer.files);
             }
         });
 
         fileInput.addEventListener('change', (e) => {
             if (e.target.files.length > 0) {
-                handleFile(e.target.files[0]);
+                handleFiles(e.target.files);
             }
         });
 
-        async function handleFile(file) {
+        async function handleFiles(files) {
+            const fileList = Array.from(files);
+
+            // 只处理第一个文件
+            const file = fileList[0];
+            await handleSingleFile(file);
+        }
+
+        async function handleSingleFile(file) {
             const MAX_SIZE = 1024 * 1024 * 1024;
             if (file.size > MAX_SIZE) {
                 showError('文件大小超过 1GB 限制');
@@ -652,7 +742,13 @@
 
                 if (data.success) {
                     fileType = data.file_type;
-                    const fileBadge = fileType === 'word' ? 'DOCX' : 'XLSX';
+                    let fileBadge;
+                    if (fileType === 'word') fileBadge = 'DOCX';
+                    else if (fileType === 'excel') fileBadge = 'XLSX';
+                    else if (fileType === 'pdf') fileBadge = 'PDF';
+                    else if (fileType === 'image') fileBadge = 'IMAGE';
+                    else fileBadge = 'UNKNOWN';
+
                     const sizeFormatted = (data.file_size / 1024 / 1024).toFixed(2) + ' MB';
 
                     fileInfo.innerHTML = `
@@ -671,12 +767,20 @@
                     `;
                     fileInfo.classList.add('show');
 
+                    // 根据文件类型显示不同的选项面板
+                    levelSelector.classList.remove('show');
+                    excelInfo.classList.remove('show');
+                    pdfInfo.classList.remove('show');
+                    imageInfo.classList.remove('show');
+
                     if (data.file_type === 'word') {
                         levelSelector.classList.add('show');
-                        excelInfo.classList.remove('show');
-                    } else {
-                        levelSelector.classList.remove('show');
+                    } else if (data.file_type === 'excel') {
                         excelInfo.classList.add('show');
+                    } else if (data.file_type === 'pdf') {
+                        pdfInfo.classList.add('show');
+                    } else if (data.file_type === 'image') {
+                        imageInfo.classList.add('show');
                     }
 
                     convertBtn.disabled = false;
@@ -716,23 +820,44 @@
             formData.append('mode', 'preview');
 
             try {
-                updateProgress(50, '转换中...');
+                updateProgress(10, '正在上传文件...');
 
+                // 创建超时控制器（30分钟超时，用于大文件）
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30 * 60 * 1000);
+
+                // 上传文件
                 const response = await fetch('/api/convert', {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    signal: controller.signal
                 });
+
+                updateProgress(50, '正在解析...');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
 
                 const data = await response.json();
 
+                clearTimeout(timeoutId);
+
                 if (data.success) {
+                    updateProgress(90, '正在生成预览...');
+                    // 短暂延迟让进度动画流畅
+                    await new Promise(resolve => setTimeout(resolve, 200));
                     updateProgress(100, '转换完成');
                     handleConvertResponse(data);
                 } else {
-                    showError(data.error);
+                    showError(data.error || '转换失败');
                 }
             } catch (error) {
-                showError('转换失败: ' + error.message);
+                if (error.name === 'AbortError') {
+                    showError('请求超时，请尝试上传较小的文件或等待更长时间');
+                } else {
+                    showError('转换失败: ' + error.message);
+                }
             } finally {
                 progress.classList.remove('show');
                 convertBtn.disabled = false;

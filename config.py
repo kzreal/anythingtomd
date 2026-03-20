@@ -14,13 +14,17 @@ BASE_DIR = Path(__file__).parent
 # Flask配置
 FLASK_HOST = os.getenv('FLASK_HOST', '0.0.0.0')
 FLASK_PORT = int(os.getenv('FLASK_PORT', 8080))
-FLASK_DEBUG = os.getenv('FLASK_DEBUG', 'True').lower() == 'true'
+FLASK_DEBUG = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
 
 # 文件上传配置
 MAX_CONTENT_LENGTH = int(os.getenv('MAX_CONTENT_LENGTH', 1073741824))  # 1GB
 UPLOAD_FOLDER = BASE_DIR / 'uploads'
 DOWNLOAD_FOLDER = Path(os.getenv('DOWNLOAD_FOLDER', '/Users/kyle/Downloads'))
-ALLOWED_EXTENSIONS = {'docx', 'xlsx', 'xls'}
+ALLOWED_EXTENSIONS = {'docx', 'xlsx', 'xls', 'pdf', 'png', 'jpg', 'jpeg'}
+
+# 千问 OCR API 配置
+QWEN_VL_API_KEY = os.getenv('QWEN_VL_API_KEY', 'sk-a1cd42b6-591e-4fb9-9af6-eb980060eb73').strip()
+QWEN_VL_BASE_URL = os.getenv('QWEN_VL_BASE_URL', 'https://ai-model.chint.com/api').strip()
 
 # 确保目录存在
 UPLOAD_FOLDER.mkdir(exist_ok=True)

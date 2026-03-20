@@ -28,7 +28,10 @@ class ExcelConverter(BaseConverter):
         if not self.file_path.exists():
             raise FileNotFoundError(f"文件不存在: {self.file_path}")
 
-        xl = pd.ExcelFile(self.file_path)
+        # 根据文件扩展名选择引擎
+        engine = 'openpyxl' if self.file_path.suffix.lower() == '.xlsx' else 'xlrd'
+
+        xl = pd.ExcelFile(self.file_path, engine=engine)
 
         self.data = {}
         for sheet_name in xl.sheet_names:
@@ -135,10 +138,8 @@ class ExcelConverter(BaseConverter):
         lines = []
         lines.append(f"## {sheet_name}\n\n")
 
-        line_no = 1
-
         if df.empty:
-            lines.append(f"<!-- {line_no} --> *空工作表*\n\n")
+            lines.append("*空工作表*\n\n")
             return ''.join(lines)
 
         # 转换为Markdown表格
@@ -148,22 +149,26 @@ class ExcelConverter(BaseConverter):
                 if pd.isna(cell):
                     cells.append("")
                 else:
-                    cells.append(str(cell).replace('\n', ' '))
+                    # 清理单元格内容：移除换行符和多余空格
+                    cell_str = str(cell).replace('\n', ' ').replace('\r', ' ').strip()
+                    cells.append(cell_str)
 
             # 跳过空行
             if all(cell in ("", " ") for cell in cells):
                 continue
 
-            lines.append(f"<!-- {line_no} --> | " + " | ".join(cells) + " |")
-            line_no += 1
+            # 生成表格行
+            row_md = "|" + "|".join(cells) + "|"
+            lines.append(row_md + "\n")
 
             # 添加分隔线（第一行之后）
             if idx == 0:
                 separator = "|" + "|".join(["---"] * len(cells)) + "|"
-                lines.append(f"<!-- {line_no} --> {separator}")
-                line_no += 1
+                lines.append(separator + "\n")
 
-        return ''.join(lines) + '\n'
+        result = ''.join(lines) + '\n'
+
+        return result
 
     def get_output_filename(self) -> str:
         """
