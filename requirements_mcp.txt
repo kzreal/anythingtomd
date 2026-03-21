@@ -1,0 +1,14 @@
+# MCP 服务器依赖
+mcp>=1.0.0
+
+# 数据验证
+pydantic>=2.0.0
+
+# 安装说明：
+# 1. 先安装项目基础依赖
+#    pip install -r requirements.txt
+# 2. 再安装 MCP 相关依赖（可使用国内镜像）
+#    pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements_mcp.txt
+#
+# 或者一次性安装所有依赖：
+#    pip install -r requirements.txt && pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements_mcp.txt

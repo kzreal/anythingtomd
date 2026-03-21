@@ -58,6 +58,28 @@ else:
 # 全局缓存字典
 conversion_cache = {}
 
+# 临时文件清理列表
+temp_files_to_cleanup = []
+
+
+def cleanup_temp_files():
+    """清理临时文件"""
+    for file_path in temp_files_to_cleanup[:]:  # 使用切片避免修改列表时的问题
+        try:
+            if file_path.exists():
+                file_path.unlink()
+                logger.info(f"已清理临时文件: {file_path}")
+        except Exception as e:
+            logger.warning(f"清理文件失败 {file_path}: {e}")
+    temp_files_to_cleanup.clear()
+
+
+@app.after_request
+def after_request_cleanup(response):
+    """请求完成后清理临时文件"""
+    cleanup_temp_files()
+    return response
+
 
 def get_session_id():
     """生成唯一的会话ID"""
@@ -263,6 +285,11 @@ def convert_file():
                 zip_path = converter.convert(options)
                 converter.cleanup()
 
+                # 将文件添加到清理列表
+                temp_files_to_cleanup.append(Path(zip_path))
+                # 清理上传的原始文件
+                temp_files_to_cleanup.append(file_path)
+
                 safe_filename = quote(f"converted_{filename}.zip", safe='')
 
                 return send_file(
@@ -295,6 +322,11 @@ def convert_file():
                 zip_path = converter.convert(options)
                 converter.cleanup()
 
+                # 将文件添加到清理列表
+                temp_files_to_cleanup.append(Path(zip_path))
+                # 清理上传的原始文件
+                temp_files_to_cleanup.append(file_path)
+
                 safe_filename = quote(f"converted_{filename}.zip", safe='')
 
                 return send_file(
@@ -325,6 +357,11 @@ def convert_file():
                 zip_path = converter.convert(options)
                 converter.cleanup()
 
+                # 将文件添加到清理列表
+                temp_files_to_cleanup.append(Path(zip_path))
+                # 清理上传的原始文件
+                temp_files_to_cleanup.append(file_path)
+
                 safe_filename = quote(f"converted_{filename}.zip", safe='')
 
                 return send_file(
@@ -338,9 +375,10 @@ def convert_file():
         logger.error(f"转换失败: {str(e)}", exc_info=True)
         return jsonify({'error': f'转换失败: {str(e)}'}), 500
     finally:
-        # 清理上传文件（图片文件由 ImageConverter.cleanup() 负责删除）
-        if file_path.exists():
-            file_path.unlink()
+        # 注意：不在 finally 中清理 file_path，因为 send_file 需要它
+        # ZIP 文件由 converter.convert() 生成，需要保留给 send_file 使用
+        # 清理由客户端下载后手动处理，或者使用定时清理机制
+        pass
 
 
 @app.route('/api/download', methods=['POST'])
@@ -407,6 +445,11 @@ def download_file():
         zip_path = converter.convert(options)
         converter.cleanup()
 
+        # 将文件添加到清理列表
+        temp_files_to_cleanup.append(Path(zip_path))
+        # 清理上传的原始文件
+        temp_files_to_cleanup.append(file_path)
+
         safe_filename = quote(f"converted_{filename}.zip", safe='')
 
         return send_file(
@@ -420,9 +463,10 @@ def download_file():
         logger.error(f"下载失败: {str(e)}", exc_info=True)
         return jsonify({'error': f'下载失败: {str(e)}'}), 500
     finally:
-        # 清理上传文件
-        if file_path.exists():
-            file_path.unlink()
+        # 注意：不在 finally 中清理 file_path，因为 send_file 需要它
+        # ZIP 文件由 converter.convert() 生成，需要保留给 send_file 使用
+        # 清理由客户端下载后手动处理，或者使用定时清理机制
+        pass
 
 
 @app.route('/api/section/<session_id>/<int:index>', methods=['GET'])

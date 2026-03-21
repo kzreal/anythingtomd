@@ -410,14 +410,14 @@ class WordConverter(BaseConverter):
             content = ''.join(section['content'])
             files[filename] = content
 
-        # 添加索引文件
-        index_content = self.zip_helper.create_index(
-            original_filename=self.file_path.name,
-            file_type='word',
-            sections=sections,
-            options={'max_level': max_level}
-        )
-        files['00_index.md'] = index_content
+        # 不添加索引文件到 ZIP
+        # index_content = self.zip_helper.create_index(
+        #     original_filename=self.file_path.name,
+        #     file_type='word',
+        #     sections=sections,
+        #     options={'max_level': max_level}
+        # )
+        # files['00_index.md'] = index_content
 
         # 创建ZIP文件
         zip_name = self.get_output_filename()
