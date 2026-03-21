@@ -5,84 +5,90 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AlltoMarkdown</title>
     <style>
-        /* Design Tokens - Enhanced Color Palette */
+        /* Vercel Design System */
         :root {
-            /* Colors - 蓝白配色 */
-            --text-primary: #1e3a8a;
-            --text-secondary: #475569;
-            --text-tertiary: #94a3b8;
+            /* Vercel Color Palette - 黑白高对比 */
+            --vc-black: #000000;
+            --vc-white: #ffffff;
+            --vc-gray-50: #fafafa;
+            --vc-gray-100: #f4f4f5;
+            --vc-gray-200: #e5e7eb;
+            --vc-gray-300: #d4d4d8;
+            --vc-gray-400: #9ca3af;
+            --vc-gray-500: #6b7280;
+            --vc-gray-600: #525252;
+            --vc-gray-700: #404040;
+            --vc-gray-800: #262626;
+            --vc-gray-900: #171717;
 
-            --bg-primary: #ffffff;
-            --bg-secondary: #f8fafc;
-            --bg-tertiary: #e2e8f0;
-            --bg-elevated: #ffffff;
+            --vc-gray-950: #0b0a0a;
 
-            --accent: #2563eb;
-            --accent-hover: #1d4ed8;
-            --accent-light: #dbeafe;
-            --accent-subtle: #bfdbfe;
+            /* Accent - 保持蓝色 */
+            --vc-accent: #0070f3;
+            --vc-accent-hover: #0060db;
+            --vc-accent-light: #e8eef6;
+            --vc-accent-subtle: #f1f5f9;
 
-            --success: #059669;
-            --success-light: #d1fae5;
-            --error: #dc2626;
-            --error-light: #fee2e2;
-            --warning: #d97706;
-            --warning-light: #fef3c7;
-
-            /* Gradients - 蓝色渐变 */
-            --gradient-primary: linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #0ea5e9 100%);
-            --gradient-success: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            /* Success/Error */
+            --vc-success: #22c55e;
+            --vc-success-bg: #dcfce7;
+            --vc-error: #ef4444;
+            --vc-error-bg: #fee2e2;
 
             /* Spacing */
-            --space-1: 4px;
-            --space-2: 8px;
-            --space-3: 12px;
-            --space-4: 16px;
-            --space-5: 20px;
-            --space-6: 24px;
-            --space-8: 32px;
-            --space-10: 40px;
-            --space-12: 48px;
-            --space-16: 64px;
+            --vc-space-1: 2px;
+            --vc-space-2: 4px;
+            --vc-space-3: 6px;
+            --vc-space-4: 8px;
+            --vc-space-5: 10px;
+            --vc-space-6: 14px;
+            --vc-space-8: 18px;
+            --vc-space-10: 20px;
+            --vc-space-12: 24px;
+            --vc-space-16: 32px;
 
-            /* Radius */
-            --radius-sm: 6px;
-            --radius-md: 10px;
-            --radius-lg: 16px;
-            --radius-xl: 20px;
-            --radius-full: 9999px;
+            /* Border Radius - Vercel 风格圆润 */
+            --vc-radius-sm: 6px;
+            --vc-radius-md: 10px;
+            --vc-radius-lg: 14px;
+            --vc-radius-xl: 18px;
+            --vc-radius-2xl: 24px;
+            --vc-radius-full: 9999px;
 
-            /* Typography */
-            --font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
-            --font-mono: 'SF Mono', 'SF Mono Regular', 'SF Mono', Consolas, 'Liberation Mono', Monaco, monospace;
+            /* Typography - 现代 Sans */
+            --vc-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --vc-font-mono: 'SF Mono', 'JetBrains Mono', 'Fira Code', Consolas, monospace;
 
-            --font-size-xs: 12px;
-            --font-size-sm: 14px;
-            --font-size-md: 15px;
-            --font-size-lg: 16px;
-            --font-size-xl: 20px;
-            --font-size-2xl: 24px;
-            --font-size-3xl: 30px;
+            --vc-font-size-xs: 11px;
+            --vc-font-size-sm: 12px;
+            --vc-font-size-md: 14px;
+            --vc-font-size-lg: 16px;
+            --vc-font-size-xl: 18px;
+            --vc-font-size-2xl: 24px;
 
-            --font-weight-normal: 400;
-            --font-weight-medium: 500;
-            --font-weight-semibold: 600;
-            --font-weight-bold: 700;
+            --vc-font-weight-normal: 400;
+            --vc-font-weight-medium: 500;
+            --vc-font-weight-semibold: 600;
 
-            --line-height-tight: 1.25;
-            --line-height-normal: 1.5;
-            --line-height-relaxed: 1.75;
+            --vc-line-height-tight: 1.3;
+            --vc-line-height-normal: 1.5;
+            --vc-line-height-relaxed: 1.7;
 
-            /* Shadows */
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(37, 99, 235, 0.15), 0 2px 4px -1px rgba(37, 99, 235, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(37, 99, 235, 0.2), 0 4px 6px -2px rgba(37, 99, 235, 0.15);
-            --shadow-xl: 0 20px 25px -5px rgba(37, 99, 235, 0.25), 0 10px 10px -5px rgba(37, 99, 235, 0.15);
+            /* Shadow - Vercel 细腻阴影 */
+            --vc-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --vc-shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.08);
+            --vc-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.12);
+            --vc-shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.16);
+            --vc-shadow-xl: 0 8px 32px rgba(0, 0, 0, 0.2);
 
-            /* Transitions */
-            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            /* Transitions - 快速流畅 */
+            --vc-transition-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);
+            --vc-transition-base: 180ms cubic-bezier(0.4, 0, 0.2, 1);
+            --vc-transition-slow: 240ms cubic-bezier(0.4, 0, 0.2, 1);
+
+            /* Border - 微细边框 */
+            --vc-border: 1px solid var(--vc-gray-200);
+            --vc-border-subtle: 1px solid var(--vc-gray-100);
         }
 
         /* Reset & Base */
@@ -93,21 +99,22 @@
         }
 
         body {
-            font-family: var(--font-family);
-            background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-            color: var(--text-primary);
-            line-height: var(--line-height-normal);
+            font-family: var(--vc-font-sans);
+            background: var(--vc-white);
+            color: var(--vc-gray-900);
+            line-height: var(--vc-line-height-normal);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         /* Header */
         .header {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-            padding: var(--space-4) var(--space-6);
+            background: var(--vc-white);
+            border-bottom: var(--vc-border);
+            padding: var(--vc-space-5) var(--vc-space-6);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -117,238 +124,211 @@
         }
 
         .logo {
-            font-size: var(--font-size-xl);
-            font-weight: var(--font-weight-bold);
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
             display: flex;
             align-items: center;
-            gap: var(--space-3);
+            gap: var(--vc-space-2);
+        }
+
+        .logo-text {
+            font-size: var(--vc-font-size-xl);
+            font-weight: var(--vc-font-weight-semibold);
+            color: var(--vc-black);
             letter-spacing: -0.02em;
         }
 
         .logo-icon {
             width: 32px;
             height: 32px;
-            background: var(--gradient-primary);
-            border-radius: var(--radius-md);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-weight: var(--font-weight-bold);
-            font-size: 16px;
-            box-shadow: var(--shadow-md);
+            background: var(--vc-black);
+            border-radius: var(--vc-radius-md);
+            color: var(--vc-white);
+            font-size: 14px;
+            font-weight: var(--vc-font-weight-semibold);
         }
 
-        /* Main Content - 左右分栏 */
+        /* Main Content */
         .main {
             flex: 1;
             display: grid;
-            grid-template-columns: 420px 1fr;
-            gap: var(--space-6);
-            padding: var(--space-6);
+            grid-template-columns: 400px 1fr;
+            gap: var(--vc-space-8);
+            padding: var(--vc-space-8) var(--vc-space-8);
             align-items: start;
-            max-width: 1800px;
+            max-width: 1600px;
             margin: 0 auto;
             width: 100%;
+            height: calc(100vh - 65px);
         }
 
-        /* 左侧面板 */
+        /* Left Panel */
         .left-panel {
-            background: var(--bg-elevated);
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            border-radius: var(--radius-xl);
-            padding: var(--space-6);
-            max-height: calc(100vh - 120px);
-            box-shadow: var(--shadow-lg);
+            background: var(--vc-white);
             display: flex;
             flex-direction: column;
+            gap: var(--vc-space-6);
         }
 
         .left-panel-content {
             flex: 1;
-            overflow-y: auto;
-            padding-right: var(--space-1);
+            display: flex;
+            flex-direction: column;
+            gap: var(--vc-space-6);
         }
 
         .left-panel-footer {
-            padding-top: var(--space-5);
-            border-top: 1px solid rgba(0, 0, 0, 0.08);
-            margin-top: var(--space-4);
-            padding-bottom: var(--space-2);
+            padding-top: var(--vc-space-5);
         }
 
-        /* 右侧面板 */
-        .right-panel {
-            background: var(--bg-elevated);
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            border-radius: var(--radius-xl);
-            height: calc(100vh - 120px);
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            overflow: hidden;
-            box-shadow: var(--shadow-lg);
+        /* Title */
+        .title {
+            font-size: var(--vc-font-size-xl);
+            font-weight: var(--vc-font-weight-normal);
+            color: var(--vc-gray-500);
+            margin-bottom: var(--vc-space-6);
+            letter-spacing: 0.01em;
+            position: relative;
+            padding-left: var(--vc-space-5);
+            opacity: 0.85;
         }
 
-        /* 右侧-切片列表 */
-        .section-list {
-            background: var(--bg-secondary);
-            border-right: 1px solid rgba(0, 0, 0, 0.08);
-            overflow-y: auto;
-            height: 100%;
+        .title::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 4px;
+            bottom: 4px;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--vc-gray-300), var(--vc-gray-400));
+            border-radius: 1px;
         }
 
-        .section-item {
-            padding: var(--space-3) var(--space-4);
+        /* Upload Area - Vercel 风格 */
+        .upload-area {
+            border: var(--vc-border-subtle);
+            border-radius: var(--vc-radius-lg);
+            padding: var(--vc-space-10) var(--vc-space-8);
+            text-align: center;
             cursor: pointer;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            font-size: var(--font-size-sm);
-            font-weight: var(--font-weight-medium);
-            color: var(--text-secondary);
-            transition: all var(--transition-fast);
+            transition: all var(--vc-transition-base);
+            background: var(--vc-white);
             position: relative;
         }
 
-        .section-item:hover {
-            background: var(--accent-light);
-            color: var(--accent);
-        }
-
-        .section-item.active {
-            background: var(--accent-light);
-            color: var(--accent);
-            border-left: 3px solid var(--accent);
-            font-weight: var(--font-weight-semibold);
-        }
-
-        /* 右侧-预览内容 */
-        .preview-panel {
-            overflow: hidden;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .title {
-            font-size: var(--font-size-3xl);
-            font-weight: var(--font-weight-bold);
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: var(--space-8);
-            letter-spacing: -0.02em;
-        }
-
-        /* Upload Area */
-        .upload-area {
-            border: 2px dashed #cbd5e1;
-            border-radius: var(--radius-lg);
-            padding: var(--space-12) var(--space-6);
-            text-align: center;
-            cursor: pointer;
-            transition: all var(--transition-base);
-            margin-bottom: var(--space-5);
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.9) 100%);
-        }
-
         .upload-area:hover {
-            border-color: var(--accent);
-            background: var(--accent-light);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
+            border-color: var(--vc-gray-400);
+            background: var(--vc-gray-50);
+            transform: translateY(-1px);
         }
 
         .upload-area.dragover {
-            border-color: var(--accent);
-            background: var(--accent-light);
-            border-style: solid;
-            transform: scale(1.02);
+            border-color: var(--vc-accent);
+            background: var(--vc-accent-light);
         }
 
         .upload-icon {
-            width: 56px;
-            height: 56px;
-            margin: 0 auto var(--space-4);
-            color: var(--accent);
-            opacity: 0.8;
+            width: 48px;
+            height: 48px;
+            margin: 0 auto var(--vc-space-4);
+            color: var(--vc-gray-500);
+            transition: color var(--vc-transition-fast);
+        }
+
+        .upload-area:hover .upload-icon {
+            color: var(--vc-accent);
         }
 
         .upload-text {
-            color: var(--text-primary);
-            font-size: var(--font-size-lg);
-            font-weight: var(--font-weight-semibold);
-            margin-bottom: var(--space-2);
+            color: var(--vc-gray-900);
+            font-size: var(--vc-font-size-md);
+            font-weight: var(--vc-font-weight-medium);
+            margin-bottom: var(--vc-space-1);
         }
 
         .upload-hint {
-            color: var(--text-tertiary);
-            font-size: var(--font-size-sm);
-            margin-top: var(--space-2);
+            color: var(--vc-gray-500);
+            font-size: var(--vc-font-size-sm);
         }
 
         #fileInput {
             display: none;
         }
 
-        /* File Info */
+        /* File Info Card */
         #fileInfo {
-            background: var(--bg-secondary);
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            border-radius: var(--radius-lg);
-            padding: var(--space-5);
-            margin-bottom: var(--space-5);
+            background: var(--vc-white);
+            border: var(--vc-border);
+            border-radius: var(--vc-radius-md);
+            box-shadow: var(--vc-shadow-sm);
+            padding: var(--vc-space-5);
+            margin-bottom: var(--vc-space-6);
             display: none;
         }
 
         #fileInfo.show {
             display: block;
+            animation: slideIn 300ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .file-info-row {
             display: flex;
             justify-content: space-between;
-            font-size: var(--font-size-md);
-            color: var(--text-secondary);
-            padding: var(--space-2) 0;
+            font-size: var(--vc-font-size-sm);
+            color: var(--vc-gray-600);
+            padding: var(--vc-space-2) 0;
         }
 
         .file-info-row strong {
-            color: var(--text-primary);
-            font-weight: var(--font-weight-semibold);
+            color: var(--vc-gray-900);
+            font-weight: var(--vc-font-weight-medium);
         }
 
         /* Options Panel */
-        #levelSelector, #excelInfo {
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            border-radius: var(--radius-lg);
-            padding: var(--space-5);
-            margin-bottom: var(--space-5);
+        #levelSelector, #excelInfo, #pdfInfo, #imageInfo {
+            background: var(--vc-white);
+            border: var(--vc-border);
+            border-radius: var(--vc-radius-md);
+            padding: var(--vc-space-5);
+            margin-bottom: var(--vc-space-6);
             display: none;
         }
 
-        #levelSelector.show, #excelInfo.show {
+        #levelSelector.show, #excelInfo.show, #pdfInfo.show, #imageInfo.show {
             display: block;
+            animation: slideIn 300ms cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .panel-label {
-            font-size: var(--font-size-md);
-            font-weight: var(--font-weight-semibold);
-            color: var(--text-secondary);
-            margin-bottom: var(--space-4);
+            font-size: var(--vc-font-size-xs);
+            font-weight: var(--vc-font-weight-semibold);
+            color: var(--vc-gray-500);
+            margin-bottom: var(--vc-space-3);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
         }
 
         .level-options {
             display: flex;
-            gap: var(--space-2);
+            gap: var(--vc-space-1);
             flex-wrap: wrap;
         }
 
         .level-option {
             cursor: pointer;
+            position: relative;
         }
 
         .level-option input[type="radio"] {
@@ -356,98 +336,97 @@
         }
 
         .level-option span {
-            display: inline-block;
-            padding: var(--space-2) var(--space-4);
-            background: var(--bg-primary);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            border-radius: var(--radius-md);
-            color: var(--text-secondary);
-            font-size: var(--font-size-md);
-            font-weight: var(--font-weight-medium);
-            transition: all var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--vc-space-2) var(--vc-space-4);
+            background: var(--vc-gray-50);
+            border-radius: var(--vc-radius-md);
+            border: var(--vc-border-subtle);
+            color: var(--vc-gray-700);
+            font-size: var(--vc-font-size-sm);
+            font-weight: var(--vc-font-weight-normal);
+            transition: all var(--vc-transition-fast);
+        }
+
+        .level-option span:hover {
+            background: var(--vc-white);
+            border-color: var(--vc-accent);
+            color: var(--vc-accent);
+            box-shadow: var(--vc-shadow-sm);
         }
 
         .level-option input[type="radio"]:checked + span {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: var(--bg-primary);
-            box-shadow: var(--shadow-md);
+            background: var(--vc-accent);
+            border-color: var(--vc-accent);
+            color: var(--vc-white);
+            font-weight: var(--vc-font-weight-medium);
         }
 
-        .level-option:hover span {
-            border-color: var(--accent);
-        }
-
-        /* Buttons */
+        /* Button - Vercel 风格 */
         .btn {
-            background: var(--gradient-primary);
-            color: var(--bg-primary);
+            background: var(--vc-black);
+            color: var(--vc-white);
             border: none;
-            padding: var(--space-5) var(--space-10);
-            border-radius: var(--radius-lg);
-            font-size: var(--font-size-xl);
-            font-weight: var(--font-weight-bold);
+            padding: var(--vc-space-3) var(--vc-space-10);
+            border-radius: var(--vc-radius-md);
+            font-size: var(--vc-font-size-md);
+            font-weight: var(--vc-font-weight-medium);
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: var(--space-2);
-            transition: all var(--transition-base);
-            box-shadow: var(--shadow-lg);
+            transition: all var(--vc-transition-base);
+            box-shadow: var(--vc-shadow-md);
+            text-transform: uppercase;
             letter-spacing: 0.01em;
             width: 100%;
+            max-width: 400px;
         }
 
         .btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-xl);
+            background: var(--vc-gray-800);
+            box-shadow: var(--vc-shadow-lg);
+            transform: translateY(-1px);
         }
 
         .btn:active:not(:disabled) {
             transform: translateY(0);
-            box-shadow: var(--shadow-md);
+            box-shadow: var(--vc-shadow-sm);
         }
 
         .btn:disabled {
-            background: var(--bg-tertiary);
-            color: var(--text-tertiary);
+            background: var(--vc-gray-200);
+            color: var(--vc-gray-400);
             cursor: not-allowed;
             box-shadow: none;
             transform: none;
         }
 
         .btn-secondary {
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            padding: var(--space-3) var(--space-6);
-            font-size: var(--font-size-md);
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-sm);
-            width: auto;
+            background: var(--vc-white);
+            color: var(--vc-gray-900);
+            border: var(--vc-border);
+            padding: var(--vc-space-2) var(--vc-space-5);
+            font-size: var(--vc-font-size-sm);
+            border-radius: var(--vc-radius-md);
+            box-shadow: var(--vc-shadow-xs);
         }
 
         .btn-secondary:hover {
-            background: var(--bg-tertiary);
-            border-color: rgba(0, 0, 0, 0.15);
-        }
-
-        .btn-icon {
-            padding: var(--space-2);
-            width: 36px;
-            height: 36px;
-            border-radius: var(--radius-md);
+            background: var(--vc-gray-50);
+            border-color: var(--vc-gray-300);
         }
 
         .btn-group {
             display: flex;
-            gap: var(--space-3);
+            gap: var(--vc-space-2);
         }
 
         /* Progress */
         #progress {
-            margin-top: var(--space-4);
             display: none;
+            margin-top: var(--vc-space-4);
         }
 
         #progress.show {
@@ -455,190 +434,253 @@
         }
 
         .progress-container {
-            background: #fafafa;
-            border: 1px solid #e0e0e0;
-            border-radius: var(--radius-md);
-            padding: var(--space-4);
-        }
-
-        #progress {
-            margin-top: var(--space-4);
-            display: none;
-        }
-
-        #progress.show {
-            display: block;
+            background: var(--vc-gray-50);
+            border-radius: var(--vc-radius-md);
+            padding: var(--vc-space-4);
+            box-shadow: var(--vc-shadow-sm);
         }
 
         .progress-bar {
-            background: rgba(37, 99, 235, 0.1);
-            border-radius: var(--radius-full);
-            height: 10px;
+            background: var(--vc-gray-200);
+            border-radius: var(--vc-radius-full);
+            height: 4px;
             overflow: hidden;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .progress-fill {
-            background: var(--gradient-primary);
+            background: var(--vc-accent);
             height: 100%;
             width: 0%;
-            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: var(--radius-full);
-            box-shadow: 0 0 20px rgba(37, 99, 235, 0.4);
+            transition: width var(--vc-transition-base);
+            box-shadow: 0 0 8px rgba(0, 112, 243, 0.3);
         }
 
         .progress-text {
-            font-size: var(--font-size-sm);
-            color: var(--text-secondary);
-            margin-top: var(--space-3);
+            font-size: var(--vc-font-size-sm);
+            color: var(--vc-gray-600);
+            margin-top: var(--vc-space-3);
             text-align: center;
-            font-weight: var(--font-weight-semibold);
         }
 
-        /* Result & Preview */
-        #result {
-            margin-top: var(--space-4);
-            display: none;
+        /* Right Panel */
+        .right-panel {
+            background: var(--vc-white);
+            border: var(--vc-border);
+            border-radius: var(--vc-radius-lg);
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            overflow: hidden;
+            box-shadow: var(--vc-shadow-sm);
+            height: 100%;
         }
 
-        #result.show {
-            display: block;
+        /* Section List */
+        .section-list {
+            background: var(--vc-gray-50);
+            border-right: var(--vc-border);
+            overflow-y: auto;
+            height: 100%;
+        }
+
+        .section-item {
+            padding: var(--vc-space-4) var(--vc-space-5);
+            cursor: pointer;
+            border-bottom: var(--vc-border);
+            font-size: var(--vc-font-size-sm);
+            color: var(--vc-gray-700);
+            transition: all var(--vc-transition-fast);
+            position: relative;
+        }
+
+        .section-item:hover {
+            background: var(--vc-white);
+            color: var(--vc-black);
+            padding-left: calc(var(--vc-space-4) + 2px);
+        }
+
+        .section-item.active {
+            background: var(--vc-accent-light);
+            color: var(--vc-accent);
+            border-left: 2px solid var(--vc-accent);
+            padding-left: calc(var(--vc-space-4) + 2px);
+            font-weight: var(--vc-font-weight-medium);
+        }
+
+        /* Preview Panel */
+        .preview-panel {
+            overflow: hidden;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
 
         .preview-section {
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            border-radius: var(--radius-lg);
-            overflow: hidden;
-            box-shadow: var(--shadow-lg);
+            flex: 1;
             display: flex;
             flex-direction: column;
-            flex: 1;
+            overflow: hidden;
         }
 
         .preview-header {
-            background: var(--bg-secondary);
-            padding: var(--space-4) var(--space-5);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            background: var(--vc-white);
+            padding: var(--vc-space-4) var(--vc-space-6);
+            border-bottom: var(--vc-border);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
         .preview-title {
-            font-size: var(--font-size-lg);
-            font-weight: var(--font-weight-semibold);
-            color: var(--text-primary);
+            font-size: var(--vc-font-size-md);
+            font-weight: var(--vc-font-weight-medium);
+            color: var(--vc-gray-900);
         }
 
         .preview-actions {
             display: flex;
-            gap: var(--space-3);
+            gap: var(--vc-space-2);
         }
 
         .preview-text {
-            background: var(--bg-primary);
-            padding: var(--space-6);
+            background: var(--vc-white);
+            padding: var(--vc-space-6);
             flex: 1;
             overflow-y: auto;
             white-space: pre-wrap;
-            font-family: var(--font-mono);
-            font-size: var(--font-size-md);
-            line-height: var(--line-height-relaxed);
-            color: var(--text-secondary);
+            font-family: var(--vc-font-mono);
+            font-size: var(--vc-font-size-sm);
+            line-height: var(--vc-line-height-relaxed);
+            color: var(--vc-gray-700);
         }
 
-        .preview-text::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        .preview-text::-webkit-scrollbar-track {
-            background: var(--bg-secondary);
-            border-radius: var(--radius-full);
-        }
-
-        .preview-text::-webkit-scrollbar-thumb {
-            background: rgba(37, 99, 235, 0.2);
-            border-radius: var(--radius-full);
-        }
-
-        .preview-text::-webkit-scrollbar-thumb:hover {
-            background: rgba(37, 99, 235, 0.35);
-        }
-
-        .left-panel-content::-webkit-scrollbar,
-        .section-list::-webkit-scrollbar {
+        /* Scrollbar - Vercel 风格 */
+        .preview-text::-webkit-scrollbar,
+        .section-list::-webkit-scrollbar,
+        .left-panel-content::-webkit-scrollbar {
             width: 8px;
         }
 
-        .left-panel-content::-webkit-scrollbar-track,
-        .section-list::-webkit-scrollbar-track {
-            background: transparent;
+        .preview-text::-webkit-scrollbar-track,
+        .section-list::-webkit-scrollbar-track,
+        .left-panel-content::-webkit-scrollbar-track {
+            background: var(--vc-gray-50);
         }
 
-        .left-panel-content::-webkit-scrollbar-thumb,
-        .section-list::-webkit-scrollbar-thumb {
-            background: rgba(37, 99, 235, 0.15);
-            border-radius: var(--radius-full);
+        .preview-text::-webkit-scrollbar-thumb,
+        .section-list::-webkit-scrollbar-thumb,
+        .left-panel-content::-webkit-scrollbar-thumb {
+            background: var(--vc-gray-200);
+            border-radius: var(--vc-radius-sm);
+            border: 2px solid transparent;
         }
 
-        .left-panel-content::-webkit-scrollbar-thumb:hover,
-        .section-list::-webkit-scrollbar-thumb:hover {
-            background: rgba(37, 99, 235, 0.25);
+        .preview-text::-webkit-scrollbar-thumb:hover,
+        .section-list::-webkit-scrollbar-thumb:hover,
+        .left-panel-content::-webkit-scrollbar-thumb:hover {
+            background: var(--vc-gray-300);
         }
 
         /* Messages */
         .message {
-            padding: var(--space-4) var(--space-5);
-            border-radius: var(--radius-lg);
-            font-size: var(--font-size-md);
-            font-weight: var(--font-weight-medium);
-            margin-top: var(--space-5);
+            padding: var(--vc-space-4) var(--vc-space-6);
+            border-radius: var(--vc-radius-md);
+            font-size: var(--vc-font-size-sm);
             display: none;
-            box-shadow: var(--shadow-sm);
+            box-shadow: var(--vc-shadow-md);
+            animation: slideIn 300ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .message.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--vc-space-2);
         }
 
         .message.success {
-            background: var(--success-light);
-            color: #065f46;
-            border: 1px solid rgba(16, 185, 129, 0.2);
+            background: var(--vc-success-bg);
+            color: var(--vc-success);
+            border: 1px solid var(--vc-success);
         }
 
         .message.error {
-            background: var(--error-light);
-            color: #991b1b;
-            border: 1px solid rgba(239, 68, 68, 0.2);
+            background: var(--vc-error-bg);
+            color: var(--vc-error);
+            border: 1px solid var(--vc-error);
         }
 
         /* Footer */
         .footer {
-            padding: var(--space-5);
+            padding: var(--vc-space-5);
             text-align: center;
-            color: var(--text-tertiary);
-            font-size: var(--font-size-sm);
+            color: var(--vc-gray-400);
+            font-size: var(--vc-font-size-xs);
+            border-top: var(--vc-border);
         }
 
-        /* Utility */
-        .divider {
-            border-top: 1px solid rgba(0, 0, 0, 0.08);
-            margin: var(--space-5) 0;
-        }
-
+        /* File Badge */
         .file-badge {
             display: inline-flex;
             align-items: center;
-            gap: var(--space-1);
-            padding: var(--space-1) var(--space-3);
-            background: var(--accent-light);
-            border-radius: var(--radius-sm);
-            font-size: var(--font-size-xs);
-            font-weight: var(--font-weight-semibold);
-            color: var(--accent);
+            gap: var(--vc-space-1);
+            padding: var(--vc-space-1) var(--vc-space-2);
+            background: var(--vc-accent-subtle);
+            border-radius: var(--vc-radius-sm);
+            font-size: var(--vc-font-size-xs);
+            font-weight: var(--vc-font-weight-semibold);
+            color: var(--vc-accent);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
         }
 
-        .success-icon {
-            width: 20px;
-            height: 20px;
-            color: var(--success);
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main {
+                grid-template-columns: 1fr;
+                height: auto;
+                padding: var(--vc-space-6);
+            }
+
+            .right-panel {
+                border-radius: 0;
+                box-shadow: none;
+            }
+
+            .left-panel {
+                border-bottom: var(--vc-border);
+            }
+
+            .left-panel-footer {
+                padding-top: var(--vc-space-4);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main {
+                padding: var(--vc-space-4);
+            }
+
+            .right-panel {
+                grid-template-columns: 220px 1fr;
+            }
+
+            .upload-area {
+                padding: var(--vc-space-8);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .main {
+                padding: var(--vc-space-3);
+            }
+
+            .right-panel {
+                grid-template-columns: 180px 1fr;
+            }
+
+            .title {
+                font-size: var(--vc-font-size-xl);
+            }
         }
     </style>
 </head>
@@ -646,7 +688,7 @@
     <header class="header">
         <div class="logo">
             <div class="logo-icon">M</div>
-            AlltoMarkdown
+            <span class="logo-text">AlltoMarkdown</span>
         </div>
     </header>
 
@@ -654,16 +696,16 @@
         <!-- 左侧面板 -->
         <div class="left-panel">
             <div class="left-panel-content">
-                <h1 class="title">AlltoMarkdown</h1>
+                <h1 class="title">将文件处理为模型易读的markdown</h1>
 
                 <div class="upload-area" id="uploadArea">
-                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2v-4"/>
                         <polyline points="17 8 12 3 7 8"/>
                         <line x1="12" y1="3" x2="12" y2="15"/>
                     </svg>
                     <div class="upload-text">点击或拖拽上传文件</div>
-                    <div class="upload-hint">支持 .docx, .xlsx, .xls, .pdf, .png, .jpg, .jpeg 格式</div>
+                    <div class="upload-hint">支持 .docx, .xlsx, .xls, .pdf, .png, .jpg, .jpeg</div>
                 </div>
 
                 <input type="file" id="fileInput" accept=".docx,.xlsx,.xls,.pdf,.png,.jpg,.jpeg">
@@ -707,8 +749,10 @@
                 </button>
 
                 <div id="progress">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progressFill"></div>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
                     </div>
                     <div class="progress-text" id="progressText">准备中...</div>
                 </div>
@@ -761,9 +805,9 @@
 
         let selectedFile = null;
         let fileType = null;
-        let sessionId = null;          // 会话ID，用于缓存
-        let cachedSections = [];        // 缓存的切片列表
-        let currentSectionIndex = 0;   // 当前选中的切片索引
+        let sessionId = null;
+        let cachedSections = [];
+        let currentSectionIndex = 0;
 
         uploadArea.addEventListener('click', () => fileInput.click());
 
@@ -792,8 +836,6 @@
 
         async function handleFiles(files) {
             const fileList = Array.from(files);
-
-            // 只处理第一个文件
             const file = fileList[0];
             await handleSingleFile(file);
         }
@@ -845,7 +887,6 @@
                     `;
                     fileInfo.classList.add('show');
 
-                    // 根据文件类型显示不同的选项面板
                     levelSelector.classList.remove('show');
                     excelInfo.classList.remove('show');
                     pdfInfo.classList.remove('show');
@@ -864,7 +905,7 @@
                     convertBtn.disabled = false;
                     result.innerHTML = '';
                     result.classList.remove('show');
-                    rightPanel.style.display = 'none';  // 隐藏右侧面板
+                    rightPanel.style.display = 'grid';
                     message.style.display = 'none';
                 } else {
                     showError(data.error);
@@ -880,7 +921,7 @@
             progress.classList.add('show');
             result.innerHTML = '';
             result.classList.remove('show');
-            rightPanel.style.display = 'none';  // 隐藏右侧面板
+            rightPanel.style.display = 'none';
             convertBtn.disabled = true;
             message.style.display = 'none';
 
@@ -894,17 +935,14 @@
             formData.append('file', selectedFile);
             formData.append('options', JSON.stringify(options));
 
-            // 统一使用预览模式
             formData.append('mode', 'preview');
 
             try {
                 updateProgress(10, '正在上传文件...');
 
-                // 创建超时控制器（30分钟超时，用于大文件）
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 30 * 60 * 1000);
 
-                // 上传文件
                 const response = await fetch('/api/convert', {
                     method: 'POST',
                     body: formData,
@@ -923,7 +961,6 @@
 
                 if (data.success) {
                     updateProgress(90, '正在生成预览...');
-                    // 短暂延迟让进度动画流畅
                     await new Promise(resolve => setTimeout(resolve, 200));
                     updateProgress(100, '转换完成');
                     handleConvertResponse(data);
@@ -947,13 +984,10 @@
             cachedSections = data.sections;
             currentSectionIndex = 0;
 
-            // 显示右侧面板
             rightPanel.style.display = 'grid';
 
-            // 渲染切片列表
             renderSectionList(cachedSections);
 
-            // 显示第一个切片的预览
             if (cachedSections[0]) {
                 showSectionPreview(0);
             }
@@ -972,15 +1006,11 @@
             if (index === currentSectionIndex) return;
             currentSectionIndex = index;
 
-            // 更新列表选中状态
             renderSectionList(cachedSections);
 
-            // 从缓存或服务器获取内容
             if (cachedSections[index].content) {
-                // 已有缓存
                 showPreviewContent(cachedSections[index].content);
             } else {
-                // 从服务器获取
                 await fetchSectionContent(sessionId, index);
             }
         }
@@ -991,7 +1021,6 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // 缓存内容
                     cachedSections[index].content = data.content;
                     showPreviewContent(data.content);
                 } else {
@@ -1013,7 +1042,6 @@
             previewText.textContent = content;
         }
 
-        // showPreview 函数已不再使用，被 handleConvertResponse 替代
         function showPreview(data) {
             // 保留空函数以兼容旧的调用方式
         }
@@ -1089,21 +1117,19 @@
         }
 
         function showError(text) {
-            message.textContent = text;
-            message.className = 'message error';
-            message.style.display = 'block';
+            message.innerHTML = `<span>${text}</span>`;
+            message.className = 'message error show';
             setTimeout(() => {
-                message.style.display = 'none';
-            }, 5000);
+                message.classList.remove('show');
+            }, 4000);
         }
 
         function showSuccess(text) {
-            message.textContent = text;
-            message.className = 'message success';
-            message.style.display = 'block';
+            message.innerHTML = `<span>${text}</span>`;
+            message.className = 'message success show';
             setTimeout(() => {
-                message.style.display = 'none';
-            }, 3000);
+                message.classList.remove('show');
+            }, 2500);
         }
 
         function updateProgress(value, text) {

@@ -1,4 +1,6 @@
-# Design Context for anythingtomd
+# Design Context
+
+此文档由 teach-impeccable 技能生成，用于指导 AlltoMarkdown 项目的设计决策。
 
 ## Design Context
 
@@ -151,7 +153,3 @@
 #### 分隔线
 - 颜色：`--bg-tertiary`
 - 厚度：1px
-
----
-
-*此文档由 teach-impeccable 技能生成，用于指导 anythingtomd 项目的设计决策。*

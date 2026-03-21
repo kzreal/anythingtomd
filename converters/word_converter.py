@@ -614,9 +614,11 @@ class WordConverter(BaseConverter):
                     continue
 
                 if level > 0 and level <= max_level:
+                    # 将当前栈顶章节添加到 sections，并从栈中移除
                     if section_stack[-1]['content']:
                         sections.append(section_stack[-1])
                         section_index += 1
+                        section_stack.pop()
 
                     new_section = {
                         'level': level,
@@ -654,7 +656,7 @@ class WordConverter(BaseConverter):
                 if table_md:
                     section_stack[-1]['content'].append(table_md)
 
-        # 添加剩余章节
+        # 添加栈中剩余的章节
         for section in section_stack:
             if section['content']:
                 sections.append(section)
