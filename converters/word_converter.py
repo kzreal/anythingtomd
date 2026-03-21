@@ -129,7 +129,41 @@ class WordConverter(BaseConverter):
                 except Exception as e:
                     logger.warning(f"Error extracting wp:inline image: {e}")
 
-        # 方法2: 检查 pic:pic 格式的图片（通过 relationship 引用）
+        # 方法2: 检查 wp:anchor 格式的图片（锚定图片，如签名）
+        for run in paragraph.runs:
+            for drawing in run._element.xpath('.//w:drawing'):
+                logger.debug(f"找到 drawing 元素，检查 anchor 子元素...")
+                # 检查 drawing 下是否有 anchor 元素（wp:anchor）
+                anchors = drawing.xpath('./wp:anchor')
+                logger.debug(f"  anchor 元素数量: {len(anchors)}")
+                for anchor in anchors:
+                    try:
+                        # 在 anchor 下查找 pic:pic 元素
+                        pics = anchor.xpath('.//pic:pic')
+                        logger.debug(f"    pic:pic 元素数量: {len(pics)}")
+                        for pic in pics:
+                            # 获取 blip 引用
+                            blips = pic.xpath('.//a:blip/@r:embed')
+                            logger.debug(f"      blip 引用: {blips}")
+                            if blips:
+                                rId = blips[0]
+                                # 提取图片数据
+                                image_data = self._get_image_data(rId)
+                                if image_data:
+                                    # 获取图片格式
+                                    image_part = self.doc.part.related_parts[rId]
+                                    image_format = image_part.content_type.split('/')[-1]
+                                    images.append({
+                                        'id': rId,
+                                        'data': image_data,
+                                        'format': image_format,
+                                        'placeholder': None
+                                    })
+                                    logger.info(f"提取到 wp:anchor 图片 (ID: {rId}, 大小: {len(image_data)} 字节)")
+                    except Exception as e:
+                        logger.warning(f"Error extracting wp:anchor image: {e}")
+
+        # 方法3: 检查 pic:pic 格式的图片（通过 relationship 引用）
         # 这些图片通常在 run 的 text 中显示为 {0}，{0} 或类似占位符
         text = paragraph.text.strip()
         if '{0}' in text or '{1}' in text:
@@ -401,6 +435,7 @@ class WordConverter(BaseConverter):
         Returns:
             (预览文本, 切片列表)
         """
+        logger.info(f"WordConverter.get_preview_text 被调用, options={options}")
         self.load_document()
 
         max_level = options.get('max_level', 0)

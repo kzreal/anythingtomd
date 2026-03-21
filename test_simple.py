@@ -6,7 +6,7 @@ import json
 import re
 
 # 测试文档
-test_doc = "/tmp/test_word/test_with_images.docx"
+test_doc = "/Users/kyle/Downloads/测试.docx"
 
 print("🧪 开始测试 Word 图片识别功能...\n")
 
