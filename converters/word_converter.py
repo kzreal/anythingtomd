@@ -107,6 +107,8 @@ class WordConverter(BaseConverter):
             图片列表
         """
         images = []
+
+        # 方法1: 检查 wp:inline 格式的图片（内嵌）
         for run in paragraph.runs:
             for inline in run._element.xpath('.//w:drawing/wp:inline'):
                 try:
@@ -122,10 +124,43 @@ class WordConverter(BaseConverter):
                                     'id': embed[0],
                                     'data': image_data,
                                     'format': image_format,
-                                    'placeholder': None  # 占位符由调用者根据行号生成
+                                    'placeholder': None
                                 })
                 except Exception as e:
-                    logger.warning(f"Error extracting paragraph image: {e}")
+                    logger.warning(f"Error extracting wp:inline image: {e}")
+
+        # 方法2: 检查 pic:pic 格式的图片（通过 relationship 引用）
+        # 这些图片通常在 run 的 text 中显示为 {0}，{0} 或类似占位符
+        text = paragraph.text.strip()
+        if '{0}' in text or '{1}' in text:
+            # 检查所有可能的 pic 引用
+            import re
+            # 匹配 {0},{0} 或 {0} 或类似模式
+            pic_pattern = r'\{[01X]\}|\{[0-9A-F\}|\{[0-9A-F\}'
+            if re.search(pic_pattern, text):
+                logger.info(f"段落可能包含 pic:pic 图片: {text[:100]}")
+                # 查找 pic:nvPic 元素中的图片引用
+                for run in paragraph.runs:
+                    for drawing in run._element.xpath('.//w:drawing/pic:pic'):
+                        for pic_nvPic in drawing.xpath('.//pic:nvPic'):
+                            # 获取 pic:blip 引用
+                            pic_blip = pic_nvPic.xpath('.//a:blip/@r:embed')
+                            if pic_blip:
+                                rId = pic_blip[0]
+                                # 提取图片数据
+                                image_data = self._get_image_data(rId)
+                                if image_data:
+                                    # 获取图片格式
+                                    image_part = self.doc.part.related_parts[rId]
+                                    image_format = image_part.content_type.split('/')[-1]
+                                    images.append({
+                                        'id': rId,
+                                        'data': image_data,
+                                        'format': image_format,
+                                        'placeholder': None
+                                    })
+                                    logger.info(f"提取到 pic:pic 图片 (ID: {rId}, 大小: {len(image_data)} 字节)")
+
         return images
 
     def _get_image_data(self, embed: str) -> Optional[bytes]:
@@ -178,8 +213,8 @@ class WordConverter(BaseConverter):
         lines.append("<!-- " + str(no + 1) + " --> |" + "|".join(["---"] * len(header_cells)) + "|")
         no += 2
 
-        # 处理数据行
-        for row in table.rows[1:]:
+        # 处理数据行（包括表头）
+        for row in table.rows:
             # 收集当前行的所有图片
             row_images = []
             for cell in row.cells:

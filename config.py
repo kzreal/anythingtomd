@@ -31,9 +31,9 @@ UPLOAD_FOLDER.mkdir(exist_ok=True)
 DOWNLOAD_FOLDER.mkdir(exist_ok=True)
 
 # LLM API配置
-LLM_API_ENDPOINT = os.getenv('LLM_API_ENDPOINT', '').strip()
-LLM_API_KEY = os.getenv('LLM_API_KEY', '').strip()
-LLM_MODEL = os.getenv('LLM_MODEL', 'vision-model').strip()
+LLM_API_ENDPOINT = os.getenv('LLM_API_ENDPOINT', 'https://ai-model.chint.com/api/chat/completions').strip()
+LLM_API_KEY = os.getenv('LLM_API_KEY', 'sk-4925e3a5-502c-4279-80a4-a480a7d01dca').strip()
+LLM_MODEL = os.getenv('LLM_MODEL', 'qwen-vl').strip()
 LLM_TIMEOUT = int(os.getenv('LLM_TIMEOUT', 30))
 LLM_MAX_RETRIES = int(os.getenv('LLM_MAX_RETRIES', 3))
 
