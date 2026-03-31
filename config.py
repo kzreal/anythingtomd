@@ -6,7 +6,14 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # 加载环境变量
-load_dotenv()
+# 检查是否指定了自定义 .env 文件路径（用于 bid-review-system 项目）
+dotenv_path = os.getenv('DOTENV_PATH')
+if dotenv_path and Path(dotenv_path).exists():
+    load_dotenv(dotenv_path)
+    print(f"[AlltoMarkdown] 使用自定义 .env 文件: {dotenv_path}")
+else:
+    load_dotenv()
+    print(f"[AlltoMarkdown] 使用默认 .env 文件")
 
 # 基础路径
 BASE_DIR = Path(__file__).parent
