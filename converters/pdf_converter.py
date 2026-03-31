@@ -58,6 +58,7 @@ class PDFConverter(BaseConverter):
         """
         self.load_document()
 
+        add_ln = options.get('add_line_numbers', True)
         files = {}
         sections = []
 
@@ -74,17 +75,17 @@ class PDFConverter(BaseConverter):
 
             if content:
                 # 添加行号
-                numbered_content = self.ocr_service.add_line_numbers(content, line_no)
+                output_content = self.ocr_service.add_line_numbers(content, line_no) if add_ln else content
                 line_no = line_no + content.count('\n') + 1
 
                 filename = f"{idx + 1:03d}.md"
-                files[filename] = numbered_content
+                files[filename] = output_content
 
                 sections.append({
                     'index': idx,
                     'title': f'第 {idx + 1} 页',
                     'filename': filename,
-                    'content': numbered_content
+                    'content': output_content
                 })
 
         self.sections = sections
@@ -119,6 +120,7 @@ class PDFConverter(BaseConverter):
             logger.warning("PDF 转换为图片失败，images 为空")
             return "# 空文档", []
 
+        add_ln = options.get('add_line_numbers', True)
         logger.info(f"开始处理 {len(self.images)} 页 PDF 进行 OCR 识别")
 
         sections = []
@@ -141,16 +143,15 @@ class PDFConverter(BaseConverter):
 
             if content:
                 logger.info(f"第 {idx + 1} 页 OCR 成功，文本长度: {len(content)} 字符")
-                # 添加行号
-                numbered_content = self.ocr_service.add_line_numbers(content, line_no)
+                output_content = self.ocr_service.add_line_numbers(content, line_no) if add_ln else content
                 line_no = line_no + content.count('\n') + 1
-                all_contents.append(numbered_content)
+                all_contents.append(output_content)
 
                 sections.append({
                     'index': idx,
                     'title': f'第 {idx + 1} 页',
                     'filename': f"{idx + 1:03d}.md",
-                    'content': numbered_content
+                    'content': output_content
                 })
             else:
                 logger.warning(f"第 {idx + 1} 页 OCR 失败，返回 None")

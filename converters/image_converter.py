@@ -53,6 +53,7 @@ class ImageConverter(BaseConverter):
         """
         self.load_image()
 
+        add_ln = options.get('add_line_numbers', True)
         files = {}
 
         # 将图片转为字节
@@ -65,18 +66,17 @@ class ImageConverter(BaseConverter):
         content = self.ocr_service.recognize_image(image_bytes, prompt)
 
         if content:
-            # 添加行号
-            numbered_content = self.ocr_service.add_line_numbers(content, 1)
+            output_content = self.ocr_service.add_line_numbers(content, 1) if add_ln else content
 
             safe_name = self.zip_helper.sanitize_filename(self.file_path.stem)
             filename = f"001_{safe_name}.md"
-            files[filename] = numbered_content
+            files[filename] = output_content
 
             self.sections = [{
                 'index': 0,
                 'title': safe_name,
                 'filename': filename,
-                'content': numbered_content
+                'content': output_content
             }]
 
         # 创建索引文件
@@ -105,6 +105,8 @@ class ImageConverter(BaseConverter):
         """
         self.load_image()
 
+        add_ln = options.get('add_line_numbers', True)
+
         # OCR 识别
         buffered = io.BytesIO()
         self.image.save(buffered, format="PNG")
@@ -114,18 +116,17 @@ class ImageConverter(BaseConverter):
         content = self.ocr_service.recognize_image(image_bytes, prompt)
 
         if content:
-            # 添加行号
-            numbered_content = self.ocr_service.add_line_numbers(content, 1)
+            output_content = self.ocr_service.add_line_numbers(content, 1) if add_ln else content
 
             safe_name = self.zip_helper.sanitize_filename(self.file_path.stem)
             self.sections = [{
                 'index': 0,
                 'title': safe_name,
                 'filename': f"001_{safe_name}.md",
-                'content': numbered_content
+                'content': output_content
             }]
 
-            return numbered_content, self.sections
+            return output_content, self.sections
 
         return "# OCR识别失败", []
 

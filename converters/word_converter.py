@@ -33,6 +33,7 @@ class WordConverter(BaseConverter):
         super().__init__(file_path)
         self.doc: Optional[Document] = None
         self.zip_helper = ZipHelper(Path(file_path).parent.parent / 'downloads')
+        self.add_line_numbers = True
 
         # 初始化 LLM 服务
         self.llm_service: Optional[ImageRecognitionService] = None
@@ -238,13 +239,16 @@ class WordConverter(BaseConverter):
         if not table.rows:
             return None, start_no
 
+        add_ln = self.add_line_numbers
         lines = []
         no = start_no
 
         # 处理表头
         header_cells = [cell.text.strip().replace('\n', ' ') for cell in table.rows[0].cells]
-        lines.append(f"<!-- {no} --> | " + " | ".join(header_cells) + " |")
-        lines.append("<!-- " + str(no + 1) + " --> |" + "|".join(["---"] * len(header_cells)) + "|")
+        prefix = f"<!-- {no} --> " if add_ln else ""
+        lines.append(f"{prefix}| " + " | ".join(header_cells) + " |")
+        prefix = f"<!-- {no + 1} --> " if add_ln else ""
+        lines.append(f"{prefix}|" + "|".join(["---"] * len(header_cells)) + "|")
         no += 2
 
         # 处理数据行（包括表头）
@@ -265,14 +269,15 @@ class WordConverter(BaseConverter):
                     else:
                         descriptions.append("[图片: 未识别图片]")
 
-                # 合并图片作为新的一行，使用表格格式
-                lines.append(f"<!-- {no} --> | " + " | ".join(descriptions) + " |")
+                prefix = f"<!-- {no} --> " if add_ln else ""
+                lines.append(f"{prefix}| " + " | ".join(descriptions) + " |")
                 no += 1
 
             # 添加表格行内容
             cells = [cell.text.strip().replace('\n', ' ') for cell in row.cells]
             if not all(cell in ("", " ") for cell in cells):
-                lines.append(f"<!-- {no} --> | " + " | ".join(cells) + " |")
+                prefix = f"<!-- {no} --> " if add_ln else ""
+                lines.append(f"{prefix}| " + " | ".join(cells) + " |")
                 no += 1
 
         return '\n'.join(lines) + '\n\n', no
@@ -353,14 +358,17 @@ class WordConverter(BaseConverter):
         if not table.rows:
             return None, start_no
 
+        add_ln = self.add_line_numbers
         lines = []
         no = start_no
 
         # 表头
         header_cells = [cell.text.strip().replace('\n', ' ') for cell in table.rows[0].cells]
-        lines.append(f"<!-- {no} --> | " + " | ".join(header_cells) + " |")
+        prefix = f"<!-- {no} --> " if add_ln else ""
+        lines.append(f"{prefix}| " + " | ".join(header_cells) + " |")
         no += 1
-        lines.append(f"<!-- {no} --> |" + "|".join(["---"] * len(header_cells)) + "|")
+        prefix = f"<!-- {no} --> " if add_ln else ""
+        lines.append(f"{prefix}|" + "|".join(["---"] * len(header_cells)) + "|")
         no += 1
 
         # 数据行
@@ -368,7 +376,8 @@ class WordConverter(BaseConverter):
             cells = [cell.text.strip().replace('\n', ' ') for cell in row.cells]
             if all(cell in ("", " ") for cell in cells):
                 continue
-            lines.append(f"<!-- {no} --> | " + " | ".join(cells) + " |")
+            prefix = f"<!-- {no} --> " if add_ln else ""
+            lines.append(f"{prefix}| " + " | ".join(cells) + " |")
             no += 1
 
         return '\n'.join(lines) + '\n\n', no
@@ -386,6 +395,7 @@ class WordConverter(BaseConverter):
         """
         self.load_document()
 
+        self.add_line_numbers = options.get('add_line_numbers', True)
         max_level = options.get('max_level', 0)
         # 处理字符串形式的max_level
         if max_level == 'all':
@@ -438,6 +448,7 @@ class WordConverter(BaseConverter):
         logger.info(f"WordConverter.get_preview_text 被调用, options={options}")
         self.load_document()
 
+        self.add_line_numbers = options.get('add_line_numbers', True)
         max_level = options.get('max_level', 0)
         # 处理字符串形式的max_level
         if max_level == 'all':
@@ -541,6 +552,8 @@ class WordConverter(BaseConverter):
             'index': 0
         }
 
+        add_ln = self.add_line_numbers
+
         line_no = 1
         for block in self.iter_block_items(self.doc):
             if isinstance(block, Paragraph):
@@ -555,22 +568,22 @@ class WordConverter(BaseConverter):
                 if any(kw in text for kw in ['目录', '目  录', 'CONTENTS']):
                     continue
 
+                prefix = f"<!-- {line_no} --> " if add_ln else ""
                 if level > 0:
-                    section['content'].append(f"<!-- {line_no} --> {'#' * level} {text}\n")
+                    section['content'].append(f"{prefix}{'#' * level} {text}\n")
                     line_no += 1
                 elif text:
-                    section['content'].append(f"<!-- {line_no} --> {text}\n")
+                    section['content'].append(f"{prefix}{text}\n")
                     line_no += 1
 
                 # 处理图片
                 for img in images:
+                    prefix = f"<!-- {line_no} --> " if add_ln else ""
                     description = processed_images.get(img['id'])
                     if description:
-                        # LLM 识别结果
-                        section['content'].append(f"<!-- {line_no} -->[图片: {description}]\n")
+                        section['content'].append(f"{prefix}[图片: {description}]\n")
                     else:
-                        # 使用占位符
-                        section['content'].append(f"<!-- {line_no} -->[图片: 未识别图片]\n")
+                        section['content'].append(f"{prefix}[图片: 未识别图片]\n")
                     line_no += 1
 
             elif isinstance(block, Table):
@@ -588,6 +601,7 @@ class WordConverter(BaseConverter):
         if max_level is None or max_level == 'all':
             max_level = float('inf')
 
+        add_ln = self.add_line_numbers
         sections = []
         section_stack = []
         section_index = 0
@@ -613,6 +627,8 @@ class WordConverter(BaseConverter):
                 if any(kw in text for kw in ['目录', '目  录', 'CONTENTS']):
                     continue
 
+                prefix = f"<!-- {line_no} --> " if add_ln else ""
+
                 if level > 0 and level <= max_level:
                     # 将当前栈顶章节添加到 sections，并从栈中移除
                     if section_stack[-1]['content']:
@@ -631,24 +647,23 @@ class WordConverter(BaseConverter):
                         section_stack.pop()
 
                     section_stack.append(new_section)
-                    section_stack[-1]['content'].append(f"<!-- {line_no} --> {'#' * level} {text}\n")
+                    section_stack[-1]['content'].append(f"{prefix}{'#' * level} {text}\n")
                     line_no += 1
                 else:
                     if level > 0:
-                        section_stack[-1]['content'].append(f"<!-- {line_no} --> {'#' * level} {text}\n")
+                        section_stack[-1]['content'].append(f"{prefix}{'#' * level} {text}\n")
                     elif text:
-                        section_stack[-1]['content'].append(f"<!-- {line_no} --> {text}\n")
+                        section_stack[-1]['content'].append(f"{prefix}{text}\n")
                     line_no += 1
 
                 # 处理图片
                 for img in images:
+                    prefix = f"<!-- {line_no} -->" if add_ln else ""
                     description = processed_images.get(img['id'])
                     if description:
-                        # LLM 识别结果
-                        section_stack[-1]['content'].append(f"<!-- {line_no} -->[图片: {description}]\n")
+                        section_stack[-1]['content'].append(f"{prefix}[图片: {description}]\n")
                     else:
-                        # 使用占位符
-                        section_stack[-1]['content'].append(f"<!-- {line_no} -->[图片: 未识别图片]\n")
+                        section_stack[-1]['content'].append(f"{prefix}[图片: 未识别图片]\n")
                     line_no += 1
 
             elif isinstance(block, Table):

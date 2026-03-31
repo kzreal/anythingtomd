@@ -43,12 +43,14 @@ class ExcelConverter(BaseConverter):
         转换Excel文件为ZIP
 
         Args:
-            options: 转换选项（暂无）
+            options: 转换选项
 
         Returns:
             ZIP文件路径
         """
         self.load_excel()
+
+        add_ln = options.get('add_line_numbers', True)
 
         # 准备输出文件
         files = {}
@@ -56,7 +58,7 @@ class ExcelConverter(BaseConverter):
 
         # 转换每个sheet
         for idx, (sheet_name, df) in enumerate(self.data.items(), 1):
-            md_content = self._convert_sheet_to_md(sheet_name, df)
+            md_content = self._convert_sheet_to_md(sheet_name, df, add_ln)
 
             # 生成文件名
             safe_name = self.zip_helper.sanitize_filename(sheet_name)
@@ -102,6 +104,8 @@ class ExcelConverter(BaseConverter):
         """
         self.load_excel()
 
+        add_ln = options.get('add_line_numbers', True)
+
         if not self.data:
             return "# 空文件"
 
@@ -114,7 +118,7 @@ class ExcelConverter(BaseConverter):
                 'index': idx - 1,
                 'title': sheet_name,
                 'filename': filename,
-                'content': self._convert_sheet_to_md(sheet_name, df)
+                'content': self._convert_sheet_to_md(sheet_name, df, add_ln)
             })
         self.sections = sections
 
@@ -122,15 +126,16 @@ class ExcelConverter(BaseConverter):
         first_sheet_name = list(self.data.keys())[0]
         first_sheet_df = self.data[first_sheet_name]
 
-        return self._convert_sheet_to_md(first_sheet_name, first_sheet_df)
+        return self._convert_sheet_to_md(first_sheet_name, first_sheet_df, add_ln)
 
-    def _convert_sheet_to_md(self, sheet_name: str, df: pd.DataFrame) -> str:
+    def _convert_sheet_to_md(self, sheet_name: str, df: pd.DataFrame, add_ln: bool = True) -> str:
         """
         将单个sheet转换为Markdown
 
         Args:
             sheet_name: Sheet名称
             df: DataFrame
+            add_ln: 是否添加行号
 
         Returns:
             Markdown内容
@@ -141,6 +146,8 @@ class ExcelConverter(BaseConverter):
         if df.empty:
             lines.append("*空工作表*\n\n")
             return ''.join(lines)
+
+        line_no = 1
 
         # 转换为Markdown表格
         for idx, row in df.iterrows():
@@ -158,13 +165,21 @@ class ExcelConverter(BaseConverter):
                 continue
 
             # 生成表格行
-            row_md = "|" + "|".join(cells) + "|"
+            if add_ln:
+                row_md = f"<!-- {line_no} --> |" + "|".join(cells) + "|"
+            else:
+                row_md = "|" + "|".join(cells) + "|"
             lines.append(row_md + "\n")
+            line_no += 1
 
             # 添加分隔线（第一行之后）
             if idx == 0:
-                separator = "|" + "|".join(["---"] * len(cells)) + "|"
+                if add_ln:
+                    separator = f"<!-- {line_no} --> |" + "|".join(["---"] * len(cells)) + "|"
+                else:
+                    separator = "|" + "|".join(["---"] * len(cells)) + "|"
                 lines.append(separator + "\n")
+                line_no += 1
 
         result = ''.join(lines) + '\n'
 

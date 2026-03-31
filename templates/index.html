@@ -741,6 +741,14 @@
                 <div id="excelInfo" style="display: none;"></div>
                 <div id="pdfInfo" style="display: none;"></div>
                 <div id="imageInfo" style="display: none;"></div>
+
+                <div id="lineNumberOption" style="display: none;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: var(--vc-gray-700);">
+                        <input type="checkbox" id="addLineNumbers" checked
+                            style="width: 16px; height: 16px; accent-color: var(--vc-accent); cursor: pointer;">
+                        <span>输出带行号编号 <code style="font-size: 12px; color: var(--vc-gray-400);">&lt;!--id--&gt;</code></span>
+                    </label>
+                </div>
             </div>
 
             <div class="left-panel-footer">
@@ -808,6 +816,8 @@
         let sessionId = null;
         let cachedSections = [];
         let currentSectionIndex = 0;
+        const lineNumberOption = document.getElementById('lineNumberOption');
+        const addLineNumbersCheckbox = document.getElementById('addLineNumbers');
 
         uploadArea.addEventListener('click', () => fileInput.click());
 
@@ -891,6 +901,7 @@
                     excelInfo.classList.remove('show');
                     pdfInfo.classList.remove('show');
                     imageInfo.classList.remove('show');
+                    lineNumberOption.style.display = 'block';
 
                     if (data.file_type === 'word') {
                         levelSelector.classList.add('show');
@@ -930,6 +941,7 @@
                 const level = document.querySelector('input[name="sliceLevel"]:checked').value;
                 options.max_level = level;
             }
+            options.add_line_numbers = addLineNumbersCheckbox.checked;
 
             const formData = new FormData();
             formData.append('file', selectedFile);
@@ -1085,6 +1097,7 @@
                 const level = document.querySelector('input[name="sliceLevel"]:checked').value;
                 options.max_level = level;
             }
+            options.add_line_numbers = addLineNumbersCheckbox.checked;
 
             const formData = new FormData();
             formData.append('file', selectedFile);
